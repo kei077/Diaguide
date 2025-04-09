@@ -8,6 +8,7 @@ from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated
 from patient.serializers import PatientSerializer
+from medecin.serializers import MedecinSerializer
 
 class UserRegistrationView(APIView):
     def post(self, request):
@@ -17,13 +18,7 @@ class UserRegistrationView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-from rest_framework.authtoken.views import ObtainAuthToken
-from rest_framework.response import Response
-from rest_framework.authtoken.models import Token
-from django.contrib.auth import authenticate, login
-from rest_framework import status
-
-class UserLoginView(ObtainAuthToken):
+class UserLoginView(APIView):
     def post(self, request, *args, **kwargs):
         username = request.data.get('username')
         password = request.data.get('password')
@@ -53,7 +48,12 @@ class UserLoginView(ObtainAuthToken):
             return Response(response_data)
         else:
             return Response({'message': 'Invalid username or password'}, status=status.HTTP_401_UNAUTHORIZED)
-  
+
+    def get(self, request, *args, **kwargs):
+        return Response({
+            "message": "Use POST with 'username' and 'password' to log in."
+        })
+
 class UserLogoutView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -65,6 +65,8 @@ class UserLogoutView(APIView):
 
         return Response({'detail': 'Successfully logged out.'})
     
+
+
 class PatientRegistrationView(APIView):
     def post(self, request):
         serializer = PatientSerializer(data=request.data)
@@ -73,3 +75,10 @@ class PatientRegistrationView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
+class MedecinRegistrationView(APIView):
+    def post(self, request):
+        serializer = MedecinSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
