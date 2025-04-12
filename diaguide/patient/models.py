@@ -11,10 +11,11 @@ class Patient(models.Model):
         blank=True,
         null=True
     )
-    weight = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)  # in kg
-    height = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)  # in cm
-    type_diabete = models.CharField(max_length=50)
-    date_maladie = models.DateField()
+    weight = models.DecimalField(max_digits=5, decimal_places=2, null=True)
+    height = models.DecimalField(max_digits=5, decimal_places=2, null=True)
+    
+    type_diabete = models.CharField(max_length=50, blank=True)
+    date_maladie = models.DateField(blank=True, null=True) 
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="patient_account")
 
