@@ -31,7 +31,7 @@ class User(AbstractUser):
     prenom = models.CharField(max_length=100, blank=True)
     role = models.CharField(max_length=15, choices=ROLE_CHOICES)
 
-    USERNAME_FIELD = 'email' 
+    USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['role', 'nom', 'prenom']  
 
     objects = CustomUserManager()

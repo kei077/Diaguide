@@ -1,17 +1,24 @@
 from rest_framework import generics, permissions
 from .models import (
     TensionArterielle, InjectionInsuline, Repas,
-    Medication, ActiviteSportive, MesureGlycemie, Proche
+    Medication, ActiviteSportive, MesureGlycemie, Proche, Patient
 )
 from .serializers import (
     TensionArterielleSerializer, InjectionInsulineSerializer,
     RepasSerializer, MedicationSerializer, ActiviteSportiveSerializer,
-    MesureGlycemieSerializer, ProcheSerializer
+    MesureGlycemieSerializer, ProcheSerializer, PatientUpdateSerializer
 )
 
 # Helper to get the current user's patient
 def get_patient_from_user(user):
     return getattr(user, 'patient_account', None)
+
+class PatientUpdateView(generics.RetrieveUpdateAPIView):
+    serializer_class = PatientUpdateSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        return self.request.user.patient_account
 
 
 # Tension Arterielle

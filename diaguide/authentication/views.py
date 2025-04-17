@@ -1,13 +1,56 @@
-from authentication.models import User
+from .models import User
 from authentication.serializers import UserSerializer
 from django.contrib.auth import authenticate, login
-from rest_framework import status
+from rest_framework import views, status, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated
-from patient.serializers import PatientSerializer
-from medecin.serializers import MedecinSerializer
+from patient.serializers import PatientSerializer, PatientUpdateSerializer
+from medecin.serializers import MedecinSerializer, MedecinUpdateSerializer, LangageSerializer
+
+class MyProfileView(views.APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        data = {
+            "email": user.email,
+            "nom": user.nom,
+            "prenom": user.prenom,
+            "role": user.role,
+        }
+
+        if user.role == 'patient':
+            from patient.serializers import PatientSerializer
+            profile = PatientSerializer(user.patient_account).data
+        elif user.role == 'medecin':
+            from medecin.serializers import MedecinSerializer
+            profile = MedecinSerializer(user.medecin_account).data
+        else:
+            profile = {}
+
+        data["profile"] = profile
+        return Response(data)
+
+    def put(self, request):
+        user = request.user
+        user.nom = request.data.get('nom', user.nom)
+        user.prenom = request.data.get('prenom', user.prenom)
+        user.save()
+
+        if user.role == 'patient':
+            serializer = PatientUpdateSerializer(user.patient_account, data=request.data, partial=True)
+        elif user.role == 'medecin':
+            serializer = MedecinUpdateSerializer(user.medecin_account, data=request.data, partial=True)
+        else:
+            return Response({"error": "Invalid role"}, status=400)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message": "Profile updated successfully"})
+        return Response(serializer.errors, status=400)
+
 
 class UserRegistrationView(APIView):
     def post(self, request):

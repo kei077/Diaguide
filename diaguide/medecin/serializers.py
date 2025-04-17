@@ -40,3 +40,30 @@ class MedecinSerializer(serializers.ModelSerializer):
             medecin.langues.add(lang_obj)
 
         return medecin
+
+class MedecinUpdateSerializer(serializers.ModelSerializer):
+    languages = serializers.CharField(write_only=True, required=False)
+    langues = LangageSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Medecin
+        fields = [
+            'INPE', 'horaire_travail', 'consultationPrice', 'jours_disponible',
+            'specialty', 'address', 'city', 'description',
+            'languages', 'langues'
+        ]
+
+    def update(self, instance, validated_data):
+        languages_string = validated_data.pop('languages', None)
+
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+
+        if languages_string:
+            instance.langues.clear()
+            for lang in [l.strip() for l in languages_string.split(',')]:
+                lang_obj, _ = Langage.objects.get_or_create(nom_lang=lang)
+                instance.langues.add(lang_obj)
+
+        instance.save()
+        return instance

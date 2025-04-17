@@ -7,4 +7,5 @@ urlpatterns = [
     path('api/auth/', include('authentication.urls')),
     path('forum/', include('forum.urls')),
     path('api/patient/', include('patient.urls')), 
+    path('content/', include('educational_content.urls')),
 ]

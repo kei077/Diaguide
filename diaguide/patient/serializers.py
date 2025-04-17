@@ -19,6 +19,9 @@ class PatientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Patient
         fields = '__all__'
+        extra_kwargs = {
+            'patient_id': {'read_only': True} 
+        }
 
     def create(self, validated_data):
         user_data = validated_data.pop('user')
@@ -26,6 +29,13 @@ class PatientSerializer(serializers.ModelSerializer):
         patient = Patient.objects.create(user=user, **validated_data)
         return patient
 
+class PatientUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Patient
+        fields = [
+            'date_of_birth', 'gender', 'weight', 'height',
+            'type_diabete', 'date_maladie'
+        ]
 
 class TensionArterielleSerializer(serializers.ModelSerializer):
     class Meta:

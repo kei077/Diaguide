@@ -22,4 +22,5 @@ urlpatterns = [
 
     path('proches/', ProcheListCreateView.as_view(), name='proche-list-create'),
     path('proches/<int:pk>/', ProcheDetailView.as_view(), name='proche-detail'),
+
 ]

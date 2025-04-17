@@ -1,8 +1,13 @@
 from django.db import models
 from authentication.models import User
+import uuid
+
+def generate_patient_id():
+    return f"PT{uuid.uuid4().hex[:6].upper()}"  # e.g. PT3A1B9F
 
 class Patient(models.Model):
-    patient_id = models.CharField(max_length=10, unique=True)
+    patient_id = models.CharField(max_length=10, unique=True, default=generate_patient_id, editable=False)
+    
     date_of_birth = models.DateField()
 
     gender = models.CharField(
