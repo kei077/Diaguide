@@ -1,6 +1,7 @@
 from django.db import models
 from authentication.models import User
 import uuid
+from medecin.models import Medecin
 
 def generate_patient_id():
     return f"PT{uuid.uuid4().hex[:6].upper()}"  # e.g. PT3A1B9F
@@ -23,6 +24,9 @@ class Patient(models.Model):
     date_maladie = models.DateField(blank=True, null=True) 
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="patient_account")
+    doctor = models.ForeignKey(
+        Medecin, on_delete=models.SET_NULL, null=True, blank=True, related_name='patients'
+    )
 
     def __str__(self):
         return f"{self.user.email} - {self.patient_id}"

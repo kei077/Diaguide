@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'forum',
     'medecin',
     'educational_content',
+    'interactions',
 ]
 
 MIDDLEWARE = [

@@ -8,4 +8,6 @@ urlpatterns = [
     path('forum/', include('forum.urls')),
     path('api/patient/', include('patient.urls')), 
     path('content/', include('educational_content.urls')),
+    path('api/interactions/', include('interactions.urls')),
+    path('api/', include('medecin.urls')),
 ]
