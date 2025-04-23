@@ -23,4 +23,9 @@ urlpatterns = [
     path('proches/', ProcheListCreateView.as_view(), name='proche-list-create'),
     path('proches/<int:pk>/', ProcheDetailView.as_view(), name='proche-detail'),
 
+    path('glucose/', GlucoseRecordListCreateView.as_view(), name='glucose-records'),
+    path('weight/', WeightRecordListCreateView.as_view(), name='weight-records'),
+    path('insulin/', InsulinRecordListCreateView.as_view(), name='insulin-records'),
+
+    path('doctor/patient/<int:patient_id>/glucose/', DoctorPatientGlucoseView.as_view(), name='doctor-patient-glucose'),
 ]

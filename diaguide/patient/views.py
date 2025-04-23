@@ -3,11 +3,78 @@ from .models import (
     TensionArterielle, InjectionInsuline, Repas,
     Medication, ActiviteSportive, MesureGlycemie, Proche, Patient
 )
+from rest_framework.exceptions import PermissionDenied
 from .serializers import (
     TensionArterielleSerializer, InjectionInsulineSerializer,
     RepasSerializer, MedicationSerializer, ActiviteSportiveSerializer,
-    MesureGlycemieSerializer, ProcheSerializer, PatientUpdateSerializer
+    MesureGlycemieSerializer, ProcheSerializer, PatientUpdateSerializer, 
+    GlucoseRecordSerializer, WeightRecordSerializer, InsulinRecordSerializer
 )
+
+from rest_framework.generics import ListAPIView
+from .models import GlucoseRecord
+from .serializers import GlucoseRecordSerializer
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import PermissionDenied
+from patient.models import Patient
+
+class DoctorPatientGlucoseView(ListAPIView):
+    serializer_class = GlucoseRecordSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        if self.request.user.role != 'medecin':
+            raise PermissionDenied("Only doctors can view this data.")
+
+        patient_id = self.kwargs.get('patient_id')
+        try:
+            patient = Patient.objects.get(id=patient_id, doctor=self.request.user.medecin_account)
+        except Patient.DoesNotExist:
+            raise PermissionDenied("You do not have access to this patient's data.")
+
+        return patient.glucose_records.order_by('-recorded_at')
+
+class InsulinRecordListCreateView(generics.ListCreateAPIView):
+    serializer_class = InsulinRecordSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        if self.request.user.role != 'patient':
+            raise PermissionDenied("Only patients can view insulin records.")
+        return self.request.user.patient_account.insulin_records.order_by('-recorded_at')
+
+    def perform_create(self, serializer):
+        if self.request.user.role != 'patient':
+            raise PermissionDenied("Only patients can add insulin records.")
+        serializer.save(patient=self.request.user.patient_account)
+
+class WeightRecordListCreateView(generics.ListCreateAPIView):
+    serializer_class = WeightRecordSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        if self.request.user.role != 'patient':
+            raise PermissionDenied("Only patients can view weight records.")
+        return self.request.user.patient_account.weight_records.order_by('-recorded_at')
+
+    def perform_create(self, serializer):
+        if self.request.user.role != 'patient':
+            raise PermissionDenied("Only patients can add weight records.")
+        serializer.save(patient=self.request.user.patient_account)
+
+class GlucoseRecordListCreateView(generics.ListCreateAPIView):
+    serializer_class = GlucoseRecordSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        if self.request.user.role != 'patient':
+            raise PermissionDenied("Only patients can view their data.")
+        return self.request.user.patient_account.glucose_records.order_by('-recorded_at')
+
+    def perform_create(self, serializer):
+        if self.request.user.role != 'patient':
+            raise PermissionDenied("Only patients can submit data.")
+        serializer.save(patient=self.request.user.patient_account)
 
 # Helper to get the current user's patient
 def get_patient_from_user(user):

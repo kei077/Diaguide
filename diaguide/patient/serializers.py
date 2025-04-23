@@ -8,10 +8,27 @@ from .models import (
     Medication,
     ActiviteSportive,
     MesureGlycemie,
-    Proche
+    Proche,
+    WeightRecord,
 )
 from authentication.models import User
+from .models import GlucoseRecord, InsulinRecord
 
+class InsulinRecordSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = InsulinRecord
+        fields = ['id', 'dose', 'recorded_at', 'notes']
+
+
+class WeightRecordSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = WeightRecord
+        fields = ['id', 'value', 'recorded_at']
+
+class GlucoseRecordSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GlucoseRecord
+        fields = ['id', 'value', 'recorded_at']
 
 class PatientSerializer(serializers.ModelSerializer):
     user = UserSerializer()
@@ -63,7 +80,6 @@ class RepasSerializer(serializers.ModelSerializer):
             'patient': {'read_only': True}
         }
 
-
 class MedicationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Medication
@@ -71,7 +87,6 @@ class MedicationSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'patient': {'read_only': True}
         }
-
 
 class ActiviteSportiveSerializer(serializers.ModelSerializer):
     class Meta:
@@ -81,7 +96,6 @@ class ActiviteSportiveSerializer(serializers.ModelSerializer):
             'patient': {'read_only': True}
         }
 
-
 class MesureGlycemieSerializer(serializers.ModelSerializer):
     class Meta:
         model = MesureGlycemie
@@ -89,7 +103,6 @@ class MesureGlycemieSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'patient': {'read_only': True}
         }
-
 
 class ProcheSerializer(serializers.ModelSerializer):
     class Meta:

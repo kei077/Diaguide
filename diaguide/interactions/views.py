@@ -6,6 +6,20 @@ from patient.models import Patient
 from medecin.models import Medecin
 from rest_framework.views import APIView
 from rest_framework.exceptions import PermissionDenied
+from datetime import datetime
+
+class DoctorUpcomingAppointmentsView(generics.ListAPIView):
+    serializer_class = AppointmentRequestSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        if self.request.user.role != 'medecin':
+            raise PermissionDenied("Only doctors can view this.")
+
+        return self.request.user.medecin_account.appointments.filter(
+            status='confirmed',
+            date__gte=datetime.now()
+        ).order_by('date')
 
 class CreateDoctorAssignmentRequestView(generics.CreateAPIView):
     serializer_class = DoctorAssignmentRequestSerializer
@@ -173,3 +187,4 @@ class RejectAppointmentRequestView(APIView):
         appointment.status = 'rejected'
         appointment.save()
         return Response({"message": "Appointment rejected."})
+

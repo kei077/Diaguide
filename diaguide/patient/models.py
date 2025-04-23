@@ -80,3 +80,31 @@ class Proche(models.Model):
     email = models.EmailField()
     telephone = models.CharField(max_length=20)
     type_relation = models.CharField(max_length=50)
+
+
+## For timeline Data
+
+class GlucoseRecord(models.Model):
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='glucose_records')
+    value = models.FloatField()
+    recorded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.patient.user.username}: {self.value} mg/dL at {self.recorded_at}"
+    
+class WeightRecord(models.Model):
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='weight_records')
+    value = models.FloatField(help_text="Weight in kilograms")
+    recorded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.patient.user.email} - {self.value} kg at {self.recorded_at}"
+
+class InsulinRecord(models.Model):
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='insulin_records')
+    dose = models.FloatField(help_text="Insulin dose in units (UI)")
+    recorded_at = models.DateTimeField(auto_now_add=True)
+    notes = models.TextField(blank=True, help_text="Optional note (e.g., before meal, after exercise)")
+
+    def __str__(self):
+        return f"{self.patient.user.email} - {self.dose} UI at {self.recorded_at}"
