@@ -10,14 +10,14 @@ from .serializers import (
     MesureGlycemieSerializer, ProcheSerializer, PatientUpdateSerializer, 
     GlucoseRecordSerializer, WeightRecordSerializer, InsulinRecordSerializer
 )
-from django.core.mail import send_mail  
 from rest_framework.generics import ListAPIView
-from .models import GlucoseRecord
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from datetime import datetime
 from interactions.models import AppointmentRequest
+from django.template.loader import render_to_string
+from django.core.mail import EmailMultiAlternatives
 
 class PatientDashboardView(APIView):
     permission_classes = [IsAuthenticated]
@@ -262,18 +262,22 @@ class ProcheListCreateView(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         proche = serializer.save(patient=get_patient_from_user(self.request.user))
         
-        # Send email to proche
         try:
-            send_mail(
-                subject="You have been added as an emergency contact",
-                message=f"Hello {proche.nom} {proche.prenom},\n\nYou have been added as an emergency contact for {proche.patient.user.nom} {proche.patient.user.prenom}.\n\nThank you.",
-                from_email=None,  
-                recipient_list=[proche.email],
-                fail_silently=False,
-            )
+            subject = "You have been added as an emergency contact"
+            from_email = None  
+            recipient_list = [proche.email]
+
+            html_content = render_to_string('emails/proche_notification.html', {
+                'proche': proche,
+                'patient': proche.patient.user,
+            })
+
+            msg = EmailMultiAlternatives(subject, '', from_email, recipient_list)
+            msg.attach_alternative(html_content, "text/html")
+            msg.send()
+
         except Exception as e:
             print(f"Failed to send email to proche: {e}")
-
 
 class ProcheDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ProcheSerializer

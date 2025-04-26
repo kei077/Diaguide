@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>You've Been Added as Emergency Contact</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 0;
+            background-color: #f9f9f9;
+        }
+        .email-container {
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            margin: 20px auto;
+        }
+        .header {
+            background: linear-gradient(135deg, #3498db, #1a5276);
+            color: white;
+            padding: 25px 20px;
+            text-align: center;
+        }
+        .logo {
+            width: 140px;
+            height: 60px;
+            margin-bottom: 10px;
+            background-color: white;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+        }
+        .logo-text {
+            font-size: 24px;
+            font-weight: bold;
+            color: #1a5276;
+        }
+        .heart-icon {
+            color: #e74c3c;
+            font-size: 22px;
+        }
+        .content {
+            padding: 30px 25px;
+        }
+        h1 {
+            color: #2c3e50;
+            font-size: 24px;
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+        .patient-name {
+            font-size: 18px;
+            background-color: #e8f4fc;
+            padding: 12px 15px;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+            margin: 25px 0;
+        }
+        .message {
+            font-size: 16px;
+            color: #555;
+            margin-bottom: 25px;
+            line-height: 1.7;
+        }
+        .cta-button {
+            display: inline-block;
+            background-color: #3498db;
+            color: white;
+            text-decoration: none;
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-weight: bold;
+            margin: 10px 0 25px;
+            transition: background-color 0.3s ease;
+        }
+        .cta-button:hover {
+            background-color: #2980b9;
+        }
+        .divider {
+            height: 1px;
+            background-color: #eaeaea;
+            margin: 25px 0;
+        }
+        .footer {
+            background-color: #f4f8fb;
+            padding: 20px;
+            text-align: center;
+            font-size: 14px;
+            color: #7f8c8d;
+            border-top: 1px solid #eaeaea;
+        }
+        .social-icons {
+            margin: 15px 0;
+        }
+        .social-icon {
+            display: inline-block;
+            width: 32px;
+            height: 32px;
+            background-color: #3498db;
+            border-radius: 50%;
+            margin: 0 5px;
+        }
+        .app-info {
+            margin-top: 15px;
+            font-size: 13px;
+        }
+        @media only screen and (max-width: 480px) {
+            .header {
+                padding: 20px 15px;
+            }
+            .content {
+                padding: 20px 15px;
+            }
+            h1 {
+                font-size: 22px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <div class="logo">
+                <div class="logo-text">Diaguide<span class="heart-icon">♥</span></div>
+            </div>
+            <h2>Emergency Contact Confirmation</h2>
+        </div>
+        
+        <div class="content">
+            <h1>Hello {{ proche.prenom }},</h1>
+            
+            <p class="message">
+                You have been designated as an emergency contact by:
+            </p>
+            
+            <div class="patient-name">
+                <strong>{{ patient.prenom }} {{ patient.nom }}</strong>
+            </div>
+            
+            <p class="message">
+                As an emergency contact, you may be notified in situations requiring immediate attention regarding their health. Thank you for being an important part of their support network.
+            </p>
+            
+            <a href="#" class="cta-button">Confirm & Learn More</a>
+            
+            <div class="divider"></div>
+            
+            <p class="message">
+                Diaguide helps patients manage their healthcare journey with ease. If you have any questions about your role as an emergency contact, please don't hesitate to contact our support team.
+            </p>
+        </div>
+        
+        <div class="footer">
+            <p><strong>Diaguide Health</strong> - Supporting Better Health Journeys</p>
+            
+            <div class="social-icons">
+                <span class="social-icon"></span>
+                <span class="social-icon"></span>
+                <span class="social-icon"></span>
+            </div>
+            
+            <p class="app-info">© 2025 Diaguide App. All rights reserved.</p>
+            <p class="app-info">This email was sent to you because you were added as an emergency contact.</p>
+        </div>
+    </div>
+</body>
+</html>
