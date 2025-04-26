@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Health Reminder</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Poppins', Arial, sans-serif;
+            background-color: #f5f8fa;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+        
+        .wrapper {
+            background-color: #f5f8fa;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #3498db, #2874a6);
+            color: white;
+            padding: 25px 20px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .header-icon {
+            font-size: 32px;
+            margin-right: 12px;
+        }
+        
+        .header-subtitle {
+            font-size: 16px;
+            font-weight: 400;
+            margin-top: 8px;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 30px;
+            font-size: 16px;
+        }
+        
+        .greeting {
+            font-size: 20px;
+            font-weight: 500;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+        
+        .reminder-box {
+            background-color: #f1f9ff;
+            border-left: 4px solid #3498db;
+            padding: 15px 20px;
+            border-radius: 6px;
+            margin: 20px 0;
+        }
+        
+        .checklist {
+            margin: 25px 0;
+        }
+        
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            margin: 12px 0;
+            background-color: #f8f9fa;
+            padding: 12px 15px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .checklist-item:hover {
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+            transform: translateY(-2px);
+        }
+        
+        .checklist-icon {
+            background-color: #e1f0fa;
+            color: #3498db;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            margin-right: 15px;
+            font-size: 18px;
+        }
+        
+        .checklist-text {
+            font-weight: 500;
+            flex: 1;
+        }
+        
+        .motivation-section {
+            margin: 30px 0 20px;
+            text-align: center;
+        }
+        
+        .motivation-text {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #3498db, #2874a6);
+            color: white;
+            text-decoration: none;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 16px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3);
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(52, 152, 219, 0.4);
+        }
+        
+        .progress-section {
+            margin: 35px 0 20px;
+            text-align: center;
+        }
+        
+        .progress-bar-container {
+            background-color: #e9ecef;
+            height: 12px;
+            border-radius: 6px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            width: 65%;
+            background: linear-gradient(90deg, #3498db, #2874a6);
+            border-radius: 6px;
+        }
+        
+        .divider {
+            height: 1px;
+            background-color: #e9ecef;
+            margin: 25px 0;
+        }
+        
+        .tip-box {
+            background-color: #e8f8f5;
+            border-left: 4px solid #2ecc71;
+            padding: 15px 20px;
+            border-radius: 6px;
+            margin: 25px 0;
+        }
+        
+        .tip-title {
+            font-weight: 600;
+            color: #27ae60;
+            margin-bottom: 10px;
+            font-size: 17px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .tip-icon {
+            margin-right: 8px;
+            font-size: 20px;
+        }
+        
+        .footer {
+            background-color: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            font-size: 14px;
+            color: #7f8c8d;
+            border-top: 1px solid #eaeaea;
+        }
+        
+        .app-branding {
+            font-weight: 600;
+            color: #3498db;
+        }
+        
+        .app-links {
+            margin: 15px 0;
+        }
+        
+        .app-link {
+            display: inline-block;
+            color: #3498db;
+            text-decoration: none;
+            margin: 0 10px;
+            font-weight: 500;
+        }
+        
+        @media only screen and (max-width: 480px) {
+            .content {
+                padding: 20px;
+            }
+            
+            .checklist-item {
+                padding: 10px;
+            }
+            
+            .checklist-icon {
+                width: 30px;
+                height: 30px;
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <div class="container">
+            <div class="header">
+                <h1><span class="header-icon">🩺</span> Daily Health Check-in</h1>
+                <div class="header-subtitle">Your partner in consistent health monitoring</div>
+            </div>
+            
+            <div class="content">
+                <div class="greeting">Hello {{ patient.prenom }} {{ patient.nom }},</div>
+                
+                <div class="reminder-box">
+                    It's time for your daily health tracking! Regular monitoring helps you stay on top of your health journey.
+                </div>
+                
+                <p>Please take a moment to log these important measurements today:</p>
+                
+                <div class="checklist">
+                    <div class="checklist-item">
+                        <div class="checklist-icon">📊</div>
+                        <div class="checklist-text">Glucose Level</div>
+                    </div>
+                    
+                    <div class="checklist-item">
+                        <div class="checklist-icon">⚖️</div>
+                        <div class="checklist-text">Weight</div>
+                    </div>
+                    
+                    <div class="checklist-item">
+                        <div class="checklist-icon">💉</div>
+                        <div class="checklist-text">Insulin Dose</div>
+                    </div>
+                </div>
+                
+                <div class="motivation-section">
+                    <p class="motivation-text">Stay consistent, stay healthy!</p>
+                    <a href="#" class="cta-button">Log My Data Now</a>
+                </div>
+                
+                <div class="divider"></div>
+                
+                <div class="tip-box">
+                    <div class="tip-title"><span class="tip-icon">💡</span> Health Tip of the Day</div>
+                    <p>Try to log your measurements at the same time each day for more consistent and accurate tracking. This helps identify patterns more effectively!</p>
+                </div>
+                
+                <p>Logging your daily health data helps you and your healthcare team monitor your progress and make informed decisions about your care plan. Your commitment to regular tracking makes a significant difference! 📈</p>
+            </div>
+            
+            <div class="footer">
+                <div class="app-branding">Diaguide Health App</div>
+                <div class="app-links">
+                    <a href="#" class="app-link">Settings</a>
+                    <a href="#" class="app-link">Support</a>
+                    <a href="#" class="app-link">Privacy</a>
+                </div>
+                <p>© 2025 Diaguide Health. All rights reserved.</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
