@@ -10,13 +10,62 @@ from .serializers import (
     MesureGlycemieSerializer, ProcheSerializer, PatientUpdateSerializer, 
     GlucoseRecordSerializer, WeightRecordSerializer, InsulinRecordSerializer
 )
-
+from django.core.mail import send_mail  
 from rest_framework.generics import ListAPIView
 from .models import GlucoseRecord
-from .serializers import GlucoseRecordSerializer
+from rest_framework.views import APIView
+from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.exceptions import PermissionDenied
-from patient.models import Patient
+from datetime import datetime
+from interactions.models import AppointmentRequest
+
+class PatientDashboardView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        if request.user.role != 'patient':
+            return Response({"error": "Only patients can access the dashboard."}, status=403)
+
+        patient = request.user.patient_account
+
+        latest_glucose = patient.glucose_records.order_by('-recorded_at').first()
+
+        latest_weight = patient.weight_records.order_by('-recorded_at').first()
+
+        latest_insulin = patient.insulin_records.order_by('-recorded_at').first()
+
+        doctor_info = None
+        if patient.doctor:
+            doctor_info = {
+                "name": f"Dr. {patient.doctor.user.nom} {patient.doctor.user.prenom}",
+                "specialty": patient.doctor.specialty,
+                "city": patient.doctor.city
+            }
+
+        next_appointment = AppointmentRequest.objects.filter(
+            patient=patient,
+            status='confirmed',
+            date__gte=datetime.now()
+        ).order_by('date').first()
+
+        appointment_info = None
+        if next_appointment:
+            appointment_info = {
+                "date": next_appointment.date,
+                "reason": next_appointment.reason
+            }
+
+        data = {
+            "metrics": {
+                "glucose": latest_glucose.value if latest_glucose else None,
+                "weight": latest_weight.value if latest_weight else None,
+                "insulin": latest_insulin.dose if latest_insulin else None,
+            },
+            "doctor": doctor_info,
+            "next_appointment": appointment_info
+        }
+
+        return Response(data)
 
 class DoctorPatientGlucoseView(ListAPIView):
     serializer_class = GlucoseRecordSerializer
@@ -211,7 +260,20 @@ class ProcheListCreateView(generics.ListCreateAPIView):
         return Proche.objects.filter(patient__user=self.request.user)
 
     def perform_create(self, serializer):
-        serializer.save(patient=get_patient_from_user(self.request.user))
+        proche = serializer.save(patient=get_patient_from_user(self.request.user))
+        
+        # Send email to proche
+        try:
+            send_mail(
+                subject="You have been added as an emergency contact",
+                message=f"Hello {proche.nom} {proche.prenom},\n\nYou have been added as an emergency contact for {proche.patient.user.nom} {proche.patient.user.prenom}.\n\nThank you.",
+                from_email=None,  
+                recipient_list=[proche.email],
+                fail_silently=False,
+            )
+        except Exception as e:
+            print(f"Failed to send email to proche: {e}")
+
 
 class ProcheDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ProcheSerializer

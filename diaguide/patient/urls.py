@@ -28,4 +28,7 @@ urlpatterns = [
     path('insulin/', InsulinRecordListCreateView.as_view(), name='insulin-records'),
 
     path('doctor/patient/<int:patient_id>/glucose/', DoctorPatientGlucoseView.as_view(), name='doctor-patient-glucose'),
+
+    path('dashboard/', PatientDashboardView.as_view(), name='patient-dashboard'),
+
 ]

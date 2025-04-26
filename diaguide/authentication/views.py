@@ -8,6 +8,8 @@ from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated
 from patient.serializers import PatientSerializer, PatientUpdateSerializer
 from medecin.serializers import MedecinSerializer, MedecinUpdateSerializer, LangageSerializer
+from django.core.mail import send_mail
+from django.conf import settings
 
 class MyProfileView(views.APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -114,8 +116,19 @@ class PatientRegistrationView(APIView):
     def post(self, request):
         serializer = PatientSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            patient = serializer.save()
+
+            try:
+                subject = "Welcome to Diaguide 🎉"
+                message = f"Hello {patient.user.prenom},\n\nThank you for registering as a patient at Diaguide. We're glad to have you onboard!"
+                recipient_list = [patient.user.email]
+
+                send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, recipient_list, fail_silently=False)
+            except Exception as e:
+                print(f"Failed to send email: {e}")
+
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 

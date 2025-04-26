@@ -7,6 +7,7 @@ from medecin.models import Medecin
 from rest_framework.views import APIView
 from rest_framework.exceptions import PermissionDenied
 from datetime import datetime
+from notifications.models import Notification
 
 class DoctorUpcomingAppointmentsView(generics.ListAPIView):
     serializer_class = AppointmentRequestSerializer
@@ -99,6 +100,12 @@ class ApproveDoctorAssignmentView(APIView):
 
         assignment.status = 'approved'
         assignment.save()
+        
+        Notification.objects.create(
+            recipient=patient.user,
+            title="Doctor Assignment Approved",
+            message=f"Dr. {assignment.medecin.user.nom} {assignment.medecin.user.prenom} has accepted to be your doctor."
+        )
 
         return Response({"message": "Assignment approved."})
 
@@ -118,6 +125,12 @@ class RejectDoctorAssignmentView(APIView):
 
         assignment.status = 'rejected'
         assignment.save()
+
+        Notification.objects.create(
+            recipient=assignment.patient.user,
+            title="Doctor Assignment Rejected",
+            message=f"Dr. {assignment.medecin.user.nom} {assignment.medecin.user.prenom} has rejected your doctor assignment request."
+        )
 
         return Response({"message": "Assignment request rejected."})
 
@@ -169,6 +182,13 @@ class ApproveAppointmentRequestView(APIView):
 
         appointment.status = 'confirmed'
         appointment.save()
+
+        Notification.objects.create(
+            recipient=appointment.patient.user,
+            title="Appointment Confirmed",
+            message=f"Your appointment with Dr. {appointment.medecin.user.nom} {appointment.medecin.user.prenom} has been confirmed for {appointment.date}."
+        )
+
         return Response({"message": "Appointment confirmed."})
 
 
@@ -186,5 +206,12 @@ class RejectAppointmentRequestView(APIView):
 
         appointment.status = 'rejected'
         appointment.save()
+
+        Notification.objects.create(
+            recipient=appointment.patient.user,
+            title="Appointment Rejected",
+            message=f"Your appointment request with Dr. {appointment.medecin.user.nom} {appointment.medecin.user.prenom} has been rejected."
+        )
+
         return Response({"message": "Appointment rejected."})
 
