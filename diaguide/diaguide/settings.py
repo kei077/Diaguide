@@ -87,12 +87,8 @@ WSGI_APPLICATION = 'diaguide.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'diaguide',        
-        'USER': 'diaguideuser',           
-        'PASSWORD': '123456',  
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',  # Crée automatiquement un fichier db.sqlite3 à la racine
     }
 }
 
