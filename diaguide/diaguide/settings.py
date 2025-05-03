@@ -49,7 +49,6 @@ INSTALLED_APPS = [
     'educational_content',
     'interactions',
     'notifications',
-    'django_q',
 ]
 
 MIDDLEWARE = [
@@ -150,8 +149,11 @@ AUTHENTICATION_BACKENDS = [
     'authentication.backends.EmailBackend',
 ]
 
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+]
 
+CORS_ALLOW_CREDENTIALS = True 
 # Email configuration
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -174,3 +176,5 @@ Q_CLUSTER = {
     'bulk': 10,
     'orm': 'default',  
 }
+
+USE_ETAGS = False
