@@ -9,12 +9,15 @@ class Question(models.Model):
 
     def __str__(self):
         return self.title
+    class Meta:
+        unique_together = ('title', 'body')
 
 class Answer(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='answers')
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='answers')
     body = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
-
+    class Meta:
+        unique_together = ('question', 'author', 'body')
     def __str__(self):
         return f"Answer by {self.author.username} on {self.question.title}"

@@ -5,17 +5,18 @@ from .serializers import ContenuSerializer
 from .permissions import IsAuthorOrReadOnly
 
 class ContenuListCreateView(generics.ListCreateAPIView):
-    queryset = Contenu.objects.all().order_by('-date_publication')
     serializer_class = ContenuSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+    def get_queryset(self):
+        return Contenu.objects.select_related('auteur').order_by('-date_publication')
+
     def perform_create(self, serializer):
         if self.request.user.role != 'medecin':
-            raise PermissionDenied("Only doctors can create content.")
+            raise PermissionDenied("Seuls les médecins peuvent créer du contenu.")
         serializer.save(auteur=self.request.user)
 
-
 class ContenuDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Contenu.objects.all()
+    queryset = Contenu.objects.select_related('auteur')
     serializer_class = ContenuSerializer
     permission_classes = [permissions.IsAuthenticated, IsAuthorOrReadOnly]
