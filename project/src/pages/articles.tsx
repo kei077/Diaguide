@@ -1,47 +1,80 @@
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/use-auth';
-import { Article, articleSchema } from '@/types';
+import axios from 'axios';
+import { z } from 'zod';
 import {
   PenSquare,
   Image as ImageIcon,
   Video,
   Tags,
-  Plus,
-  Eye,
   Trash2,
   Edit2,
   Search,
-  Filter,
   AlertCircle
 } from 'lucide-react';
 
-// Mock data - replace with actual API calls
-const mockArticles: Article[] = [
-  {
-    id: '1',
-    title: 'Understanding Type 2 Diabetes',
-    summary: 'A comprehensive guide to managing type 2 diabetes effectively.',
-    content: '# Understanding Type 2 Diabetes\n\nType 2 diabetes is a chronic condition...',
-    coverImage: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=800',
-    tags: ['diabetes', 'health', 'management'],
-    status: 'published',
-    authorId: 'doctor-1',
-    authorName: 'Dr. Kawtar TAIK',
-    createdAt: '2024-03-15T10:00:00Z',
-    updatedAt: '2024-03-15T10:00:00Z'
-  }
-];
+// Définir le schéma de validation
+const articleSchema = z.object({
+  id: z.string().optional(),
+  title: z.string().min(1, 'Title is required'),
+  summary: z.string().min(1, 'Summary is required'),
+  content: z.string().min(1, 'Content is required'),
+  coverImage: z.string().url('Invalid URL').optional().or(z.literal('')),
+  videoUrl: z.string().url('Invalid URL').optional().or(z.literal('')),
+  tags: z.union([
+    z.array(z.string()),
+    z.string().transform((str: string) => str.split(',').map((tag: string) => tag.trim()))
+  ])
+});
 
-function ArticleForm({ onSubmit, initialData = null, onCancel }: { 
-  onSubmit: (data: any) => void; 
+type ArticleFormValues = z.infer<typeof articleSchema>;
+
+type Article = ArticleFormValues & {
+  status: 'published';
+  authorId: string;
+  authorName: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+interface BackArticle {
+  id: number;
+  titre: string;
+  description: string;
+  text: string | null;
+  image: string | null;
+  video: string | null;
+  keywords: string;
+  auteur_id: number;
+  date_publication: string;
+  auteur: {
+    id: number;  // Notez que c'est un number
+    nom: string;
+    email: string;
+    prenom: string;
+  };
+}
+
+function ArticleForm({
+  onSubmit,
+  initialData = null,
+  onCancel
+}: {
+  onSubmit: (data: Article) => void;
   initialData?: Article | null;
   onCancel: () => void;
 }) {
-  const { register, handleSubmit, formState: { errors, isSubmitting }, watch } = useForm({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    watch,
+    setValue
+  } = useForm<ArticleFormValues>({
     resolver: zodResolver(articleSchema),
     defaultValues: initialData || {
       title: '',
@@ -49,249 +82,205 @@ function ArticleForm({ onSubmit, initialData = null, onCancel }: {
       content: '',
       coverImage: '',
       videoUrl: '',
-      tags: [],
-      status: 'draft'
+      tags: []
     }
   });
 
   const coverImage = watch('coverImage');
   const videoUrl = watch('videoUrl');
 
+  const handleFormSubmit = (data: ArticleFormValues) => {
+    const processedData: Article = {
+      ...data,
+      id: data.id || '',
+      coverImage: data.coverImage || '',
+      videoUrl: data.videoUrl || '',
+      tags: typeof data.tags === 'string' 
+        ? data.tags.split(',').map((tag: string) => tag.trim())
+        : data.tags,
+      status: 'published',
+      authorId: initialData?.authorId || '',
+      authorName: initialData?.authorName || '',
+      createdAt: initialData?.createdAt || new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    onSubmit(processedData);
+  };
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
+      {/* TITLE */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">
-          Title
-        </label>
+        <label className="block text-sm font-medium">Title</label>
         <input
           type="text"
           {...register('title')}
-          className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 
-            px-3 py-2 text-gray-900 dark:text-gray-100 
-            focus:border-primary-500 focus:ring-primary-500
-            dark:bg-gray-700 transition-colors duration-200"
+          className="mt-1 block w-full rounded-md border px-3 py-2"
           placeholder="Enter article title"
         />
         {errors.title && (
-          <p className="mt-1 text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+          <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
             <AlertCircle className="h-4 w-4" />
             {errors.title.message}
           </p>
         )}
       </div>
 
+      {/* SUMMARY */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">
-          Summary
-        </label>
+        <label className="block text-sm font-medium">Summary</label>
         <textarea
           {...register('summary')}
           rows={3}
-          className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 
-            px-3 py-2 text-gray-900 dark:text-gray-100 
-            focus:border-primary-500 focus:ring-primary-500
-            dark:bg-gray-700 transition-colors duration-200"
-          placeholder="Brief summary of the article"
+          className="mt-1 block w-full rounded-md border px-3 py-2"
+          placeholder="Brief summary"
         />
         {errors.summary && (
-          <p className="mt-1 text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+          <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
             <AlertCircle className="h-4 w-4" />
             {errors.summary.message}
           </p>
         )}
       </div>
 
+      {/* CONTENT */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">
-          Content
-        </label>
+        <label className="block text-sm font-medium">Content</label>
         <textarea
           {...register('content')}
           rows={10}
-          className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 
-            px-3 py-2 text-gray-900 dark:text-gray-100 
-            focus:border-primary-500 focus:ring-primary-500
-            dark:bg-gray-700 font-mono transition-colors duration-200"
-          placeholder="Write your article content here (Markdown supported)"
+          className="mt-1 block w-full rounded-md border px-3 py-2 font-mono"
+          placeholder="Write here…"
         />
         {errors.content && (
-          <p className="mt-1 text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+          <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
             <AlertCircle className="h-4 w-4" />
             {errors.content.message}
           </p>
         )}
       </div>
 
+      {/* COVER IMAGE & VIDEO */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">
-            Cover Image URL
-          </label>
-          <div className="mt-1">
-            <div className="flex items-center gap-2">
-              <ImageIcon className="h-5 w-5 text-gray-400" />
-              <input
-                type="text"
-                {...register('coverImage')}
-                className="block w-full rounded-md border border-gray-300 dark:border-gray-600 
-                  px-3 py-2 text-gray-900 dark:text-gray-100 
-                  focus:border-primary-500 focus:ring-primary-500
-                  dark:bg-gray-700 transition-colors duration-200"
-                placeholder="https://example.com/image.jpg"
+          <label className="block text-sm font-medium">Cover Image URL</label>
+          <div className="mt-1 flex items-center gap-2">
+            <ImageIcon className="h-5 w-5 text-gray-400" />
+            <input
+              type="text"
+              {...register('coverImage')}
+              className="w-full rounded-md border px-3 py-2"
+              placeholder="https://..."
+            />
+          </div>
+          {coverImage && (
+            <div className="mt-2 h-40 w-full overflow-hidden rounded-lg bg-gray-100">
+              <img
+                src={coverImage}
+                alt="Preview"
+                className="h-full w-full object-cover"
+                onError={(e) =>
+                  (e.currentTarget.src =
+                    'https://via.placeholder.com/800x400?text=Invalid+URL')
+                }
               />
             </div>
-            {coverImage && (
-              <div className="mt-2 relative w-full h-40 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700">
-                <img
-                  src={coverImage}
-                  alt="Cover preview"
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = 'https://via.placeholder.com/800x400?text=Invalid+Image+URL';
-                  }}
-                />
-              </div>
-            )}
-          </div>
+          )}
+          {errors.coverImage && (
+            <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
+              <AlertCircle className="h-4 w-4" />
+              {errors.coverImage.message}
+            </p>
+          )}
         </div>
-
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">
-            Video URL (Optional)
-          </label>
-          <div className="flex items-center gap-2">
+          <label className="block text-sm font-medium">Video URL</label>
+          <div className="mt-1 flex items-center gap-2">
             <Video className="h-5 w-5 text-gray-400" />
             <input
               type="text"
               {...register('videoUrl')}
-              className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 
-                px-3 py-2 text-gray-900 dark:text-gray-100 
-                focus:border-primary-500 focus:ring-primary-500
-                dark:bg-gray-700 transition-colors duration-200"
-              placeholder="https://youtube.com/watch?v=..."
+              className="w-full rounded-md border px-3 py-2"
+              placeholder="https://..."
             />
           </div>
+          {errors.videoUrl && (
+            <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
+              <AlertCircle className="h-4 w-4" />
+              {errors.videoUrl.message}
+            </p>
+          )}
         </div>
       </div>
 
+      {/* TAGS */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">
-          Tags (comma-separated)
-        </label>
-        <div className="flex items-center gap-2">
+        <label className="block text-sm font-medium">Tags (comma separated)</label>
+        <div className="mt-1 flex items-center gap-2">
           <Tags className="h-5 w-5 text-gray-400" />
           <input
             type="text"
             {...register('tags')}
-            className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 
-              px-3 py-2 text-gray-900 dark:text-gray-100 
-              focus:border-primary-500 focus:ring-primary-500
-              dark:bg-gray-700 transition-colors duration-200"
-            placeholder="diabetes, health, management"
+            className="w-full rounded-md border px-3 py-2"
+            placeholder="tag1, tag2, ..."
           />
         </div>
+        {errors.tags && (
+          <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
+            <AlertCircle className="h-4 w-4" />
+            {errors.tags.message}
+          </p>
+        )}
       </div>
 
+      {/* ACTIONS */}
       <div className="flex justify-end gap-3">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={onCancel}
-          className="border-gray-300 dark:border-gray-600"
-        >
+        <Button variant="outline" type="button" onClick={onCancel}>
           Cancel
         </Button>
-        <Button
-          type="submit"
-          name="status"
-          value="draft"
-          variant="outline"
-          disabled={isSubmitting}
-        >
-          Save as Draft
-        </Button>
-        <Button
-          type="submit"
-          name="status"
-          value="published"
-          disabled={isSubmitting}
-        >
-          Publish
+        <Button type="submit" disabled={isSubmitting}>
+          Publish Article
         </Button>
       </div>
     </form>
   );
 }
 
-function ArticleCard({ article, onEdit, onDelete }: { 
-  article: Article; 
-  onEdit: (article: Article) => void;
+function ArticleCard({
+  article,
+  onEdit,
+  onDelete
+}: {
+  article: Article;
+  onEdit: (a: Article) => void;
   onDelete: (id: string) => void;
 }) {
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 group">
+    <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition">
       {article.coverImage && (
-        <div className="relative h-48 rounded-t-lg overflow-hidden">
+        <div className="relative h-48 overflow-hidden rounded-t-lg">
           <img
             src={article.coverImage}
             alt={article.title}
-            className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
+            className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
         </div>
       )}
-      <div className="p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-            {article.title}
-          </h3>
-          <span className={`px-2 py-1 text-xs rounded-full ${
-            article.status === 'published' 
-              ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' 
-              : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400'
-          }`}>
-            {article.status === 'published' ? 'Published' : 'Draft'}
+      <div className="p-4">
+        <div className="flex justify-between items-center mb-2">
+          <h3 className="font-semibold">{article.title}</h3>
+          <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">
+            Published
           </span>
         </div>
-        
-        <p className="text-gray-600 dark:text-gray-300 text-sm mb-4">
-          {article.summary}
-        </p>
-
-        <div className="flex flex-wrap gap-2 mb-4">
-          {article.tags.map(tag => (
-            <span
-              key={tag}
-              className="px-2 py-1 text-xs rounded-full bg-primary-50 dark:bg-primary-900/20 
-                text-primary-700 dark:text-primary-300"
-            >
-              {tag}
-            </span>
-          ))}
-        </div>
-
-        <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
-          <span>
-            {new Date(article.updatedAt).toLocaleDateString()}
-          </span>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onEdit(article)}
-              className="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400"
-            >
-              <Edit2 className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onDelete(article.id)}
-              className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300"
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </div>
+        <p className="text-sm text-gray-600 mb-4">{article.summary}</p>
+        <div className="flex justify-end gap-2">
+          <Button variant="ghost" size="sm" onClick={() => onEdit(article)}>
+            <Edit2 className="h-4 w-4" />
+          </Button>
+          <Button variant="ghost" size="sm" onClick={() => onDelete(article.id)}>
+            <Trash2 className="h-4 w-4" />
+          </Button>
         </div>
       </div>
     </div>
@@ -299,137 +288,245 @@ function ArticleCard({ article, onEdit, onDelete }: {
 }
 
 export function ArticlesPage() {
-  const [isCreating, setIsCreating] = useState(false);
-  const [editingArticle, setEditingArticle] = useState<Article | null>(null);
-  const [articles, setArticles] = useState(mockArticles);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filter, setFilter] = useState('all');
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isCreating, setIsCreating] = useState(false);
+  const [editing, setEditing] = useState<Article | null>(null);
+  const [search, setSearch] = useState('');
 
-  if (user?.role !== 'doctor') {
-    navigate('/dashboard');
-    return null;
-  }
+  useEffect(() => {
+    if (!user || user.role !== 'doctor') {
+      navigate('/dashboard');
+      return;
+    }
 
-  const handleSubmit = (data: any) => {
-    // Here you would typically make an API call to save the article
-    console.log('Saving article:', data);
-    
-    const newArticle: Article = {
-      id: editingArticle?.id || crypto.randomUUID(),
-      ...data,
-      authorId: user.id,
-      authorName: user.name,
-      createdAt: editingArticle?.createdAt || new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      tags: typeof data.tags === 'string' ? data.tags.split(',').map((t: string) => t.trim()) : data.tags
+    const fetchArticles = async () => {
+      setLoading(true);
+      try {
+        const token = localStorage.getItem('token') || '';
+        console.log('[DEBUG] Token:', token);
+        const res = await axios.get<BackArticle[]>(
+          'http://localhost:8000/content/articles/',
+          { headers: { Authorization: `Token ${token}` }, withCredentials: true }
+        );
+        console.log('[DEBUG] id user', user.id);
+        console.log('[DEBUG] Réponse API brute:', res.data);
+        // Log des données brutes
+        
+        const mapped: Article[] = res.data.filter(b => b.auteur.email === user.id)
+        .map(b => ({
+          id: b.id.toString(),
+          title: b.titre,
+          summary: b.description,
+          content: b.text || '',
+          coverImage: b.image || '',
+          videoUrl: b.video || '',
+          tags: b.keywords.split(',').map(t => t.trim()),
+          status: 'published',
+          authorId: b.auteur.id.toString(), // Conversion en string pour le state
+          authorName: `${b.auteur.prenom} ${b.auteur.nom}`,
+          createdAt: b.date_publication,
+          updatedAt: b.date_publication
+        })
+      );
+        
+        setArticles(mapped);
+      } catch (err) {
+        setError('Impossible de charger les articles');
+        console.error('Error fetching articles:', err);
+      } finally {
+        setLoading(false);
+      }
     };
 
-    if (editingArticle) {
-      setArticles(articles.map(a => a.id === editingArticle.id ? newArticle : a));
-    } else {
-      setArticles([newArticle, ...articles]);
+    fetchArticles();
+  }, [user, navigate]);
+
+  const handleSubmit = async (formData: Article) => {
+    const token = localStorage.getItem('token') || '';
+    const payload = {
+      titre: formData.title,
+      description: formData.summary,
+      text: formData.content,
+      image: formData.coverImage || null,
+      video: formData.videoUrl || null,
+      keywords: Array.isArray(formData.tags) ? formData.tags.join(',') : formData.tags,
+    };
+
+    console.log('Soumission article - Données envoyées:', {
+      payload: payload,
+      authorInfo: {
+        authorId: formData.authorId,
+        authorName: formData.authorName
+      },
+      isEdit: !!editing,
+      editingId: editing?.id
+    });
+
+    try {
+      const baseUrl = 'http://localhost:8000/content/articles/';
+      let response;
+
+      if (editing) {
+        console.log(`Mise à jour article existant ID: ${editing.id}`);
+        response = await axios.put(
+          `${baseUrl}${editing.id}/`,
+          payload,
+          { 
+            headers: { Authorization: `Token ${token}` }, 
+            withCredentials: true 
+          }
+        );
+      } else {
+        console.log('Création nouvel article');
+        response = await axios.post(
+          baseUrl,
+          payload,
+          { 
+            headers: { Authorization: `Token ${token}` }, 
+            withCredentials: true 
+          }
+        );
+      }
+
+      console.log('Réponse API après soumission:', response.data);
+
+      const b = response.data;
+      const updatedArticle: Article = {
+        id: b.id.toString(),
+        title: b.titre,
+        summary: b.description,
+        content: b.text || '',
+        coverImage: b.image || '',
+        videoUrl: b.video || '',
+        tags: b.keywords.split(',').map(t => t.trim()),
+        status: 'published',
+        authorId: formData.authorId,
+        authorName: formData.authorName,
+        createdAt: formData.createdAt,
+        updatedAt: new Date().toISOString()
+      };
+
+      console.log('Article mis à jour/local:', updatedArticle);
+
+      setArticles(prev =>
+        editing
+          ? prev.map(a => {
+              if (a.id === updatedArticle.id) {
+                console.log('Remplacement article existant:', a, 'par:', updatedArticle);
+                return updatedArticle;
+              }
+              return a;
+            })
+          : [updatedArticle, ...prev]
+      );
+
+      setIsCreating(false);
+      setEditing(null);
+    } catch (err) {
+      console.error('Erreur lors de la sauvegarde:', {
+        error: err,
+        payload: payload,
+        context: {
+          isEditing: !!editing,
+          articleId: editing?.id,
+          authorInfo: {
+            id: formData.authorId,
+            name: formData.authorName
+          }
+        }
+      });
+      alert('Erreur lors de la sauvegarde');
     }
-
-    setIsCreating(false);
-    setEditingArticle(null);
   };
 
-  const handleEdit = (article: Article) => {
-    setEditingArticle(article);
-    setIsCreating(true);
-  };
-
-  const handleDelete = (id: string) => {
-    if (confirm('Are you sure you want to delete this article?')) {
-      setArticles(articles.filter(a => a.id !== id));
+  const handleDelete = async (id: string) => {
+    if (!confirm('Supprimer cet article ?')) return;
+    
+    const token = localStorage.getItem('token') || '';
+    try {
+      await axios.delete(
+        `http://localhost:8000/content/articles/${id}/`,
+        { headers: { Authorization: `Token ${token}` }, withCredentials: true }
+      );
+      setArticles(prev => prev.filter(a => a.id !== id));
+    } catch (err) {
+      alert('Impossible de supprimer');
+      console.error('Error deleting article:', err);
     }
   };
 
-  const filteredArticles = articles.filter(article => {
-    const matchesSearch = article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         article.summary.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesFilter = filter === 'all' || article.status === filter;
-    return matchesSearch && matchesFilter;
+  const filteredArticles = articles.filter(a => {
+    return (
+      a.title.toLowerCase().includes(search.toLowerCase()) ||
+      a.summary.toLowerCase().includes(search.toLowerCase())
+    );
   });
+
+  if (loading) return <p>Chargement…</p>;
+  if (error) return <p className="text-red-600">{error}</p>;
 
   return (
     <div className="max-w-5xl mx-auto py-6 space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Articles</h1>
-          <p className="text-gray-500 dark:text-gray-400">Write and manage your medical articles</p>
+          <h1 className="text-2xl font-bold">Articles</h1>
+          <p className="text-gray-500">Écrivez et gérez vos articles</p>
         </div>
-        <Button onClick={() => setIsCreating(!isCreating)}>
-          {isCreating ? (
-            'Cancel'
-          ) : (
-            <>
-              <PenSquare className="h-5 w-5 mr-2" />
-              Write Article
-            </>
-          )}
+        <Button
+          onClick={() => {
+            setIsCreating(!isCreating);
+            setEditing(null);
+          }}
+        >
+          <PenSquare className="h-5 w-5 mr-2" />
+          {isCreating ? 'Annuler' : 'Nouveau'}
         </Button>
       </div>
 
       {isCreating ? (
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6">
-            {editingArticle ? 'Edit Article' : 'Create New Article'}
-          </h2>
-          <ArticleForm 
-            onSubmit={handleSubmit}
-            initialData={editingArticle}
-            onCancel={() => {
-              setIsCreating(false);
-              setEditingArticle(null);
-            }}
-          />
-        </div>
+        <ArticleForm
+          initialData={editing || undefined}
+          onSubmit={handleSubmit}
+          onCancel={() => {
+            setIsCreating(false);
+            setEditing(null);
+          }}
+        />
       ) : (
         <>
-          <div className="flex items-center gap-4 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+          <div className="flex gap-4 bg-white p-4 rounded shadow">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-2 h-5 w-5 text-gray-400" />
               <input
                 type="search"
-                placeholder="Search articles..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 rounded-md border border-gray-300 dark:border-gray-600
-                  focus:border-primary-500 focus:ring-primary-500
-                  dark:bg-gray-700 dark:text-gray-100 transition-colors duration-200"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Rechercher…"
+                className="w-full pl-10 pr-4 py-2 border rounded"
               />
             </div>
-            <select
-              value={filter}
-              onChange={(e) => setFilter(e.target.value)}
-              className="rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2
-                focus:border-primary-500 focus:ring-primary-500
-                dark:bg-gray-700 dark:text-gray-100 transition-colors duration-200"
-            >
-              <option value="all">All Articles</option>
-              <option value="published">Published</option>
-              <option value="draft">Drafts</option>
-            </select>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {filteredArticles.map(article => (
+            {filteredArticles.map((a) => (
               <ArticleCard
-                key={article.id}
-                article={article}
-                onEdit={handleEdit}
+                key={a.id}
+                article={a}
+                onEdit={(art) => {
+                  setEditing(art);
+                  setIsCreating(true);
+                }}
                 onDelete={handleDelete}
               />
             ))}
           </div>
 
           {filteredArticles.length === 0 && (
-            <div className="text-center py-12">
-              <p className="text-gray-500 dark:text-gray-400">No articles found</p>
-            </div>
+            <p className="text-center text-gray-500 py-12">Aucun article</p>
           )}
         </>
       )}

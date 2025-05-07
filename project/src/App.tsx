@@ -18,7 +18,8 @@ import { RegisterPage } from './pages/RegisterPage';
 import { Learn } from './pages/learn';
 import { Patients } from './pages/patients';
 import { GestionArticle } from './pages/gererArticles';
-
+import AppointmentsPage from '@/pages/appointments'
+import ManageDoctorAppointments from './pages/doctor-appointments';
 const queryClient = new QueryClient();
 
 function RoleSwitcher() {
@@ -90,11 +91,27 @@ function AppContent() {
                     </PrivateRoute>
                   }
                 />
-                <Route
-                  path="/learn"
+                 <Route
+                  path="/health-tracking"
                   element={
                     <PrivateRoute>
-                      <Learn />
+                      <PatientDashboard />
+                    </PrivateRoute>
+                  }
+                />
+                <Route
+                  path="/appointments"
+                  element={
+                    <PrivateRoute>
+                      <AppointmentsPage />
+                    </PrivateRoute>
+                  }
+                />
+                <Route
+                  path="/doctor-appointments"
+                  element={
+                    <PrivateRoute>
+                      <ManageDoctorAppointments />
                     </PrivateRoute>
                   }
                 />

@@ -51,6 +51,8 @@ export function Sidebar() {
     { href: '/health-tracking', icon: Activity, label: 'Health Tracking' },
     { href: '/learn', icon: Brain, label: 'Learn About Diabetes' },
     { href: '/qa', icon: MessageSquare, label: 'Q&A Forum' },
+    { href: '/appointments', icon: BookOpen, label: 'Appointments' },
+
   ];
 
   const doctorLinks = [
@@ -59,6 +61,7 @@ export function Sidebar() {
     { href: '/articles', icon: PenSquare, label: 'Write Articles' },
     { href: '/qa', icon: MessageSquare, label: 'Q&A Forum' },
     { href: '/learn', icon: Brain, label: 'Knowledge Base' },
+    { href: '/doctor-appointments', icon: BookOpen, label: 'Appointments' },
   ];
 
   const adminLinks = [

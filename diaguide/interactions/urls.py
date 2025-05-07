@@ -10,6 +10,8 @@ from .views import (
     ApproveAppointmentRequestView,
     RejectAppointmentRequestView,
     DoctorUpcomingAppointmentsView,
+    DoctorAppointmentRequestsView,
+   MedecinSearchView,
 )
 
 urlpatterns = [
@@ -18,11 +20,11 @@ urlpatterns = [
     path('doctor/appointments/<int:request_id>/approve/', ApproveAppointmentRequestView.as_view(), name='approve-appointment'),
     path('doctor/appointments/<int:request_id>/reject/', RejectAppointmentRequestView.as_view(), name='reject-appointment'),
     path('doctor/appointments/upcoming/', DoctorUpcomingAppointmentsView.as_view(), name='doctor-upcoming-appointments'),
-
+    path('medecins/search/', MedecinSearchView.as_view(), name='medecin-search'),
     path('doctor/assignments/', DoctorAssignmentRequestListView.as_view(), name='assignment-list'),
     path('doctor/assignments/<int:request_id>/approve/', ApproveDoctorAssignmentView.as_view(), name='approve-assignment'),
     path('doctor/assignments/<int:request_id>/reject/', RejectDoctorAssignmentView.as_view(), name='reject-assignment'),
-   
     path('my/assignment/', MyDoctorAssignmentRequestView.as_view(), name='my-assignment-request'),
     path('my/appointments/', MyAppointmentRequestsView.as_view(), name='my-appointment-requests'),
+    path('doctor/appointments/', DoctorAppointmentRequestsView.as_view(), name='doctor-appointments'),
 ]

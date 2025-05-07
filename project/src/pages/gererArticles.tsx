@@ -4,16 +4,15 @@ import { format } from 'date-fns';
 
 interface Article {
   id: number;
-  title: string;
-  content: string;
+  titre: string;
   description: string;
-  readTime: string;
-  image: string;
-  author: {
-    name: string;
-    role: string;
-    avatar: string;
-  };
+  text: string | null;
+  image: string | null;
+  video: string | null;
+  keywords: string;
+  date_publication: string;
+  auteur_nom: string;
+  auteur_prenom: string;
   status: 'pending' | 'approved' | 'rejected';
 }
 
