@@ -52,7 +52,6 @@ export default function AppointmentsPage() {
   // Filtres
   const [specialty, setSpecialty] = useState('');
   const [city, setCity] = useState('');
-  const [langue, setLangue] = useState('');
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
 
@@ -103,7 +102,6 @@ export default function AppointmentsPage() {
           break;
         case 401:
           errorMessage = "Session expirée. Veuillez vous reconnecter.";
-          // Rediriger vers la page de connexion si besoin
           break;
         case 403:
           errorMessage = `Accès refusé: ${errorMessage}`;
@@ -185,7 +183,6 @@ export default function AppointmentsPage() {
     const filters = {
       specialty: specialty || undefined,
       city: city || undefined,
-      langues: langue || undefined,
       min_price: minPrice || undefined,
       max_price: maxPrice || undefined
     };
@@ -291,33 +288,33 @@ export default function AppointmentsPage() {
       pending: {
         icon: '⏳',
         text: 'En attente',
-        bg: 'bg-yellow-100',
-        textColor: 'text-yellow-800'
+        bg: 'bg-amber-100',
+        textColor: 'text-amber-800'
       },
       confirmed: {
         icon: '✅',
         text: 'Confirmé',
-        bg: 'bg-green-100',
-        textColor: 'text-green-800'
+        bg: 'bg-emerald-100',
+        textColor: 'text-emerald-800'
       },
       rejected: {
         icon: '❌',
         text: 'Rejeté',
-        bg: 'bg-red-100',
-        textColor: 'text-red-800'
+        bg: 'bg-rose-100',
+        textColor: 'text-rose-800'
       },
       cancelled: {
         icon: '⚪',
         text: 'Annulé',
-        bg: 'bg-gray-100',
-        textColor: 'text-gray-800'
+        bg: 'bg-slate-100',
+        textColor: 'text-slate-800'
       }
     };
 
     const { icon, text, bg, textColor } = statusMap[status];
 
     return (
-      <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 ${bg} ${textColor}`}>
+      <span className={`inline-flex items-center rounded-full px-2.5 py-1 ${bg} ${textColor} font-medium text-xs`}>
         {icon} {text}
       </span>
     );
@@ -338,28 +335,27 @@ export default function AppointmentsPage() {
   // Extraire les spécialités et villes uniques pour les options de filtre
   const specialties = [...new Set(medecins.map(m => m.specialty))];
   const cities = [...new Set(medecins.map(m => m.city))];
-  const languesList = Array.from(
-    new Set(medecins.flatMap(m => m.langues.map(l => l.nom_lang)))
-  );
+
   interface ErrorAlertProps {
     message: string | null;
     onRetry?: (() => void) | null;
   }
+  
   // Composant pour afficher les erreurs
   const ErrorAlert = ({ message, onRetry = null }: ErrorAlertProps) => {
     if (!message) return null;
     
     return (
-      <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+      <div className="bg-rose-50 border border-rose-200 rounded-lg p-4 mb-4">
         <div className="flex">
           <div className="flex-shrink-0">
-            <svg className="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <svg className="h-5 w-5 text-rose-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
             </svg>
           </div>
           <div className="ml-3">
-            <h3 className="text-sm font-medium text-red-800">Erreur</h3>
-            <div className="mt-2 text-sm text-red-700">
+            <h3 className="text-sm font-medium text-rose-800">Erreur</h3>
+            <div className="mt-2 text-sm text-rose-700">
               <p>{message}</p>
             </div>
             {onRetry && (
@@ -367,7 +363,7 @@ export default function AppointmentsPage() {
                 <button
                   onClick={onRetry}
                   type="button"
-                  className="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                  className="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-rose-700 bg-rose-100 hover:bg-rose-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500"
                 >
                   Réessayer
                 </button>
@@ -380,14 +376,24 @@ export default function AppointmentsPage() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8 space-y-8">
-      <h1 className="text-3xl font-bold text-gray-900">Gestion des rendez-vous</h1>
+    <div className="max-w-6xl mx-auto px-4 py-10 space-y-8 bg-slate-50 min-h-screen">
+      <h1 className="text-3xl font-bold text-slate-900 flex items-center gap-3 border-b pb-4 border-slate-200">
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+        Gestion des rendez-vous
+      </h1>
 
       <div className="grid gap-8 md:grid-cols-2">
         <div className="space-y-6">
           {/* Formulaire de recherche de médecins */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800">Rechercher un médecin</h2>
+          <div className="bg-white rounded-xl shadow-sm p-6 border border-slate-100">
+            <h2 className="text-xl font-semibold mb-4 text-slate-800 flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              Rechercher un médecin
+            </h2>
             
             {/* Affichage des erreurs de recherche */}
             {searchError && <ErrorAlert message={searchError} onRetry={() => fetchMedecins()} />}
@@ -395,12 +401,12 @@ export default function AppointmentsPage() {
             <form onSubmit={handleSearch} className="grid gap-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="specialty" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="specialty" className="block text-sm font-medium text-slate-700 mb-1">
                     Spécialité
                   </label>
                   <select
                     id="specialty"
-                    className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
                     value={specialty}
                     onChange={e => setSpecialty(e.target.value)}
                   >
@@ -412,12 +418,12 @@ export default function AppointmentsPage() {
                 </div>
 
                 <div>
-                  <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="city" className="block text-sm font-medium text-slate-700 mb-1">
                     Ville
                   </label>
                   <select
                     id="city"
-                    className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
                     value={city}
                     onChange={e => setCity(e.target.value)}
                   >
@@ -430,44 +436,37 @@ export default function AppointmentsPage() {
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="langue" className="block text-sm font-medium text-gray-700 mb-1">
-                    Langue
-                  </label>
-                  <select
-                    id="langue"
-                    className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                    value={langue}
-                    onChange={e => setLangue(e.target.value)}
-                  >
-                    <option value="">Toutes langues</option>
-                    {languesList.map(l => (
-                      <option key={l} value={l}>{l}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label htmlFor="priceRange" className="block text-sm font-medium text-gray-700 mb-1">
+                <div className="col-span-2">
+                  <label htmlFor="priceRange" className="block text-sm font-medium text-slate-700 mb-1">
                     Prix consultation
                   </label>
                   <div className="flex gap-2">
-                    <input
-                      type="number"
-                      placeholder="Min"
-                      className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                      value={minPrice}
-                      onChange={e => setMinPrice(e.target.value)}
-                      min="0"
-                    />
-                    <input
-                      type="number"
-                      placeholder="Max"
-                      className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                      value={maxPrice}
-                      onChange={e => setMaxPrice(e.target.value)}
-                      min={minPrice || "0"}
-                    />
+                    <div className="relative flex-1">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <span className="text-slate-500 sm:text-sm">DH</span>
+                      </div>
+                      <input
+                        type="number"
+                        placeholder="Min"
+                        className="w-full rounded-lg border border-slate-300 pl-10 pr-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                        value={minPrice}
+                        onChange={e => setMinPrice(e.target.value)}
+                        min="0"
+                      />
+                    </div>
+                    <div className="relative flex-1">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <span className="text-slate-500 sm:text-sm">DH</span>
+                      </div>
+                      <input
+                        type="number"
+                        placeholder="Max"
+                        className="w-full rounded-lg border border-slate-300 pl-10 pr-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                        value={maxPrice}
+                        onChange={e => setMaxPrice(e.target.value)}
+                        min={minPrice || "0"}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -475,32 +474,58 @@ export default function AppointmentsPage() {
               <button
                 type="submit"
                 disabled={searchLoading}
-                className="rounded-md bg-blue-600 text-white px-4 py-2 hover:bg-blue-700 disabled:opacity-50 transition-colors mt-2"
+                className="rounded-lg bg-indigo-600 text-white px-4 py-2 hover:bg-indigo-700 disabled:opacity-50 transition-colors mt-2 font-medium shadow-sm flex items-center justify-center gap-2"
               >
-                {searchLoading ? 'Recherche en cours...' : 'Rechercher'}
+                {searchLoading ? (
+                  <>
+                    <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Recherche en cours...
+                  </>
+                ) : (
+                  <>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    Rechercher
+                  </>
+                )}
               </button>
             </form>
           </div>
 
           {/* Liste des médecins filtrés */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800">Médecins disponibles</h2>
+          <div className="bg-white rounded-xl shadow-sm p-6 border border-slate-100">
+            <h2 className="text-xl font-semibold mb-4 text-slate-800 flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+              Médecins disponibles
+            </h2>
             
             {searchLoading ? (
-              <div className="text-center py-4">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
+              <div className="text-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500 mx-auto"></div>
+                <p className="mt-4 text-sm text-slate-500">Recherche en cours...</p>
               </div>
             ) : filteredMedecins.length === 0 ? (
-              <p className="text-gray-500 text-center py-4">Aucun médecin trouvé</p>
+              <div className="text-center py-12 bg-slate-50 rounded-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-slate-400 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p className="text-slate-500 mt-4">Aucun médecin trouvé</p>
+              </div>
             ) : (
-              <div className="space-y-4 max-h-96 overflow-y-auto">
+              <div className="space-y-3 max-h-96 overflow-y-auto pr-1">
                 {filteredMedecins.map(medecin => (
                   <div 
                     key={medecin.id} 
-                    className={`border rounded-lg p-4 hover:bg-gray-50 cursor-pointer transition-colors ${
+                    className={`border rounded-lg p-4 hover:bg-indigo-50 cursor-pointer transition-all transform hover:-translate-y-1 hover:shadow-md ${
                       medecinId === medecin.id.toString() 
-                        ? 'border-blue-500 bg-blue-50 ring-1 ring-blue-500' 
-                        : 'border-gray-200'
+                        ? 'border-indigo-500 bg-indigo-50 shadow-md' 
+                        : 'border-slate-200'
                     }`}
                     onClick={() => {
                       setMedecinId(medecin.id.toString());
@@ -514,18 +539,17 @@ export default function AppointmentsPage() {
                   >
                     <div className="flex justify-between items-start">
                       <div>
-                        <h3 className="font-medium text-gray-900">{medecin.prenom} {medecin.nom}</h3>
-                        <p className="text-sm text-gray-600">{medecin.specialty}</p>
+                        <h3 className="font-medium text-slate-900">Dr. {medecin.prenom} {medecin.nom}</h3>
+                        <p className="text-sm text-slate-600 mt-1">{medecin.specialty}</p>
                       </div>
-                      <span className="text-sm font-medium text-blue-600">{medecin.consultationPrice} DH</span>
+                      <span className="text-sm font-medium text-indigo-600 bg-indigo-50 px-2 py-1 rounded-md">{medecin.consultationPrice} DH</span>
                     </div>
-                    <div className="mt-2">
-                      <p className="text-sm text-gray-600">{medecin.city}</p>
-                      {medecin.langues.length > 0 && (
-                        <p className="text-sm text-gray-500 mt-1">
-                          Langues: {medecin.langues.map(l => l.nom_lang).join(', ')}
-                        </p>
-                      )}
+                    <div className="mt-2 flex items-center text-sm text-slate-500 gap-1">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                      {medecin.city}
                     </div>
                   </div>
                 ))}
@@ -536,35 +560,48 @@ export default function AppointmentsPage() {
 
         {/* Formulaire de demande de rendez-vous */}
         <div className="space-y-6">
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800">Nouvelle demande de rendez-vous</h2>
+          <div className="bg-white rounded-xl shadow-sm p-6 border border-slate-100">
+            <h2 className="text-xl font-semibold mb-4 text-slate-800 flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              Nouvelle demande de rendez-vous
+            </h2>
             
             {/* Affichage des erreurs de formulaire */}
             {formError && <ErrorAlert message={formError} />}
             
             <form onSubmit={handleSubmit} className="grid gap-4">
               {medecinId && (
-                <div className="bg-blue-50 p-3 rounded-md border border-blue-100">
-                  <p className="text-sm text-blue-800 font-medium">
-                    Médecin sélectionné: {filteredMedecins.find(m => m.id.toString() === medecinId)?.prenom} {filteredMedecins.find(m => m.id.toString() === medecinId)?.nom}
+                <div className="bg-indigo-50 p-3 rounded-lg border border-indigo-100 flex items-center gap-3">
+                  <div className="bg-indigo-100 rounded-full p-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                  </div>
+                  <p className="text-sm text-indigo-800 font-medium">
+                    Dr. {filteredMedecins.find(m => m.id.toString() === medecinId)?.prenom} {filteredMedecins.find(m => m.id.toString() === medecinId)?.nom}
                   </p>
                 </div>
               )}
               
               {fieldErrors.medecin && !medecinId && (
-                <div className="text-sm text-red-600 mb-1">
+                <div className="text-sm text-rose-600 mb-1 flex items-center gap-1">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
                   {fieldErrors.medecin}
                 </div>
               )}
 
               <div>
-                <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="date" className="block text-sm font-medium text-slate-700 mb-1">
                   Date et heure *
                 </label>
                 <input
                   id="date"
                   type="datetime-local"
-                  className={`w-full rounded-md border ${fieldErrors.date ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-300'} px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500`}
+                  className={`w-full rounded-lg border ${fieldErrors.date ? 'border-rose-500 ring-1 ring-rose-500' : 'border-slate-300'} px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500`}
                   value={date}
                   onChange={e => {
                     setDate(e.target.value);
@@ -579,20 +616,23 @@ export default function AppointmentsPage() {
                   required
                 />
                 {fieldErrors.date && (
-                  <div className="text-sm text-red-600 mt-1">
+                  <div className="text-sm text-rose-600 mt-1 flex items-center gap-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
                     {fieldErrors.date}
                   </div>
                 )}
               </div>
 
               <div>
-                <label htmlFor="reason" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="reason" className="block text-sm font-medium text-slate-700 mb-1">
                   Motif (optionnel)
                 </label>
                 <textarea
                   id="reason"
                   rows={3}
-                  className={`w-full rounded-md border ${fieldErrors.reason ? 'border-red-500' : 'border-gray-300'} px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500`}
+                  className={`w-full rounded-lg border ${fieldErrors.reason ? 'border-rose-500 ring-1 ring-rose-500' : 'border-slate-300'} px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500`}
                   value={reason}
                   onChange={e => {
                     setReason(e.target.value);
@@ -606,7 +646,10 @@ export default function AppointmentsPage() {
                   placeholder="Décrivez brièvement la raison de votre consultation"
                 />
                 {fieldErrors.reason && (
-                  <div className="text-sm text-red-600 mt-1">
+                  <div className="text-sm text-rose-600 mt-1 flex items-center gap-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
                     {fieldErrors.reason}
                   </div>
                 )}
@@ -615,29 +658,41 @@ export default function AppointmentsPage() {
               <button
                 type="submit"
                 disabled={loading || !medecinId || !date}
-                className={`rounded-md px-4 py-2 text-white mt-2 transition-colors ${
+                className={`rounded-lg px-4 py-3 text-white mt-2 transition-all ${
                   loading || !medecinId || !date
-                    ? 'bg-gray-400 cursor-not-allowed'
-                    : 'bg-blue-600 hover:bg-blue-700'
-                }`}
+                    ? 'bg-slate-400 cursor-not-allowed'
+                    : 'bg-indigo-600 hover:bg-indigo-700 shadow-md hover:shadow-lg'
+                } font-medium flex items-center justify-center gap-2`}
               >
                 {loading ? (
-                  <span className="flex items-center justify-center">
-                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <>
+                    <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
                     Envoi en cours...
-                  </span>
-                ) : 'Envoyer la demande'}
+                  </>
+                ) : (
+                  <>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                    </svg>
+                    Envoyer la demande
+                  </>
+                )}
               </button>
             </form>
           </div>
 
           {/* Historique des rendez-vous */}
-          <div className="bg-white rounded-lg shadow overflow-hidden">
+          <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-slate-100">
             <div className="p-6">
-              <h2 className="text-xl font-semibold mb-4 text-gray-800">Vos rendez-vous</h2>
+              <h2 className="text-xl font-semibold mb-4 text-slate-800 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                Vos rendez-vous
+              </h2>
               
               {/* Affichage des erreurs de chargement des rendez-vous */}
               {apptsError && (
@@ -648,34 +703,39 @@ export default function AppointmentsPage() {
               )}
               
               {!apptsError && appts.length === 0 ? (
-                <div className="text-center py-8">
-                  <p className="text-gray-500">Vous n'avez aucun rendez-vous programmé</p>
+                <div className="text-center py-12 bg-slate-50 rounded-lg">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-slate-400 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                  </svg>
+                  <p className="text-slate-500 mt-4">Vous n'avez aucun rendez-vous programmé</p>
                 </div>
               ) : !apptsError && (
                 <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
+                  <table className="min-w-full divide-y divide-slate-200">
+                    <thead className="bg-slate-50">
                       <tr>
-                        <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                        <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Médecin</th>
-                        <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
-                        <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Motif</th>
+                        <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Date</th>
+                        <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Médecin</th>
+                        <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Statut</th>
+                        <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Motif</th>
                       </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
+                    <tbody className="bg-white divide-y divide-slate-200">
                       {appts.map(a => (
-                        <tr key={a.id} className="hover:bg-gray-50">
-                          <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
+                        <tr key={a.id} className="hover:bg-slate-50 transition-colors">
+                          <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-slate-900">
                             {formatDateForDisplay(a.date)}
                           </td>
-                          <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
+                          <td className="px-4 py-3 whitespace-nowrap text-sm text-slate-700">
                             {`Dr. ${a.medecin_prenom} ${a.medecin_nom}`}
                           </td>
                           <td className="px-4 py-3 whitespace-nowrap text-sm">
                             {getStatusDisplay(a.status)}
                           </td>
-                          <td className="px-4 py-3 text-sm text-gray-700 max-w-xs truncate">
-                            {a.reason || '—'}
+                          <td className="px-4 py-3 text-sm text-slate-700 max-w-xs truncate">
+                            {a.reason || (
+                              <span className="text-slate-400">—</span>
+                            )}
                           </td>
                         </tr>
                       ))}
