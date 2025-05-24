@@ -6,7 +6,7 @@ from .models import (
     InjectionInsuline,
     Repas,
     Medication,
-    ActiviteSportive,
+   ActiviteSportive,
     MesureGlycemie,
     Proche,
     WeightRecord,
@@ -111,3 +111,7 @@ class ProcheSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'patient': {'read_only': True}
         }
+class PatientDashboardSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Patient
+        fields = ['weight', 'height']

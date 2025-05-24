@@ -2,7 +2,7 @@ from django.db import models
 from authentication.models import User
 import uuid
 from medecin.models import Medecin
-
+from django.utils import timezone
 def generate_patient_id():
     return f"PT{uuid.uuid4().hex[:6].upper()}"  # e.g. PT3A1B9F
 
@@ -60,10 +60,32 @@ class Medication(models.Model):
 
 ## classe activite sportive 
 class ActiviteSportive(models.Model):
-    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='activites')
-    date_heure = models.DateTimeField()
-    type_activite = models.CharField(max_length=100)
+    ACTIVITY_CHOICES = [
+        ('walking', 'Walking'),
+        ('running', 'Running'),
+        ('swimming', 'Swimming'),
+        ('cycling', 'Cycling'),
+        ('strength_training', 'Strength Training'),
+        ('other', 'Other'),
+    ]
+
+    patient = models.ForeignKey(
+        Patient,
+        on_delete=models.CASCADE,
+        related_name='activities'
+    )
+    date_heure = models.DateTimeField(default=timezone.now)
+    type_activity = models.CharField(
+        max_length=100,
+        choices=ACTIVITY_CHOICES
+    )
+    duration = models.PositiveIntegerField(
+        help_text="Duration in minutes"
+    )
     description = models.TextField(blank=True)
+
+    def __str__(self):
+        return f"{self.get_activity_type_display()} on {self.date_time:%Y-%m-%d %H:%M}"
 
 ## classe mesure glycemie
 class MesureGlycemie(models.Model):

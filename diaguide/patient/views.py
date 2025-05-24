@@ -18,7 +18,7 @@ from datetime import datetime
 from interactions.models import AppointmentRequest
 from django.template.loader import render_to_string
 from django.core.mail import EmailMultiAlternatives
-
+from django.utils import timezone
 class PatientDashboardView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -33,7 +33,14 @@ class PatientDashboardView(APIView):
         latest_weight = patient.weight_records.order_by('-recorded_at').first()
 
         latest_insulin = patient.insulin_records.order_by('-recorded_at').first()
-
+        bmi = None
+        if patient.height and latest_weight:
+            try:
+                height_meters = float(patient.height) / 100
+                weight_kg = float(latest_weight.value)
+                bmi = round(weight_kg / (height_meters ** 2), 1)
+            except (TypeError, ValueError):
+                bmi = None
         doctor_info = None
         if patient.doctor:
             doctor_info = {
@@ -45,7 +52,7 @@ class PatientDashboardView(APIView):
         next_appointment = AppointmentRequest.objects.filter(
             patient=patient,
             status='confirmed',
-            date__gte=datetime.now()
+            date__gte=timezone.now()
         ).order_by('date').first()
 
         appointment_info = None
@@ -60,6 +67,7 @@ class PatientDashboardView(APIView):
                 "glucose": latest_glucose.value if latest_glucose else None,
                 "weight": latest_weight.value if latest_weight else None,
                 "insulin": latest_insulin.dose if latest_insulin else None,
+                "bmi": bmi if bmi else None,
             },
             "doctor": doctor_info,
             "next_appointment": appointment_info

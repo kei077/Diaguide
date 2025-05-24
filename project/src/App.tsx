@@ -91,6 +91,14 @@ function AppContent() {
                     </PrivateRoute>
                   }
                 />
+                <Route
+                  path="/Learn"
+                  element={
+                    <PrivateRoute>
+                      <Learn />
+                    </PrivateRoute>
+                  }
+                />
                  <Route
                   path="/health-tracking"
                   element={
