@@ -172,3 +172,24 @@ class PatientSummarySerializer(serializers.ModelSerializer):
     def get_last_status(self, obj):
         appt = self._get_last_appt(obj)
         return appt.status if appt else None
+class PatientProfileSerializer(serializers.ModelSerializer):
+    weight_records = WeightRecordSerializer(many=True, read_only=True)
+    glucose_records = GlucoseRecordSerializer(many=True, read_only=True)
+    insulin_records = InsulinRecordSerializer(many=True, read_only=True)
+    tensions = TensionArterielleSerializer(many=True, read_only=True)  # Correspond à related_name='tensions'
+    injections = InjectionInsulineSerializer(many=True, read_only=True)  # Correspond à related_name='injections'
+    repas = RepasSerializer(many=True, read_only=True)  # Correspond à related_name='repas'
+    medications = MedicationSerializer(many=True, read_only=True)  # Correspond à related_name='medications'
+    activities = ActiviteSportiveSerializer(many=True, read_only=True)  # Correspond à related_name='activities'
+    glycemies = MesureGlycemieSerializer(many=True, read_only=True)  # Correspond à related_name='glycemies'
+    proches = ProcheSerializer(many=True, read_only=True)  # Correspond à related_name='proches'
+
+    class Meta:
+        model = Patient
+        fields = [
+            'patient_id', 'date_of_birth', 'gender', 
+            'weight', 'height', 'type_diabete', 'date_maladie',
+            'weight_records', 'glucose_records', 'insulin_records',
+            'tensions', 'injections', 'repas', 'medications',
+            'activities', 'glycemies', 'proches'
+        ]

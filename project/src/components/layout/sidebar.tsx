@@ -57,7 +57,7 @@ export function Sidebar() {
 
   const doctorLinks = [
     { href: '/profile', icon: User, label: 'Profile' },
-    { href: '/patients', icon: Heart, label: 'My Patients' },
+    { href: '/dashboard', icon: Heart, label: 'My Patients' },
     { href: '/articles', icon: PenSquare, label: 'Write Articles' },
     { href: '/qa', icon: MessageSquare, label: 'Q&A Forum' },
     { href: '/learn', icon: Brain, label: 'Knowledge Base' },
