@@ -1,5 +1,7 @@
 from rest_framework import serializers
 from .models import Patient
+from django.utils import timezone
+from interactions.models import AppointmentRequest
 from authentication.serializers import UserSerializer
 from .models import (
     TensionArterielle,
@@ -115,3 +117,58 @@ class PatientDashboardSerializer(serializers.ModelSerializer):
     class Meta:
         model = Patient
         fields = ['weight', 'height']
+
+class PatientSummarySerializer(serializers.ModelSerializer):
+    # on expose ici l'email du User lié
+    email = serializers.EmailField(source='user.email', read_only=True)
+    # champs personnalisés
+    age              = serializers.SerializerMethodField()
+    type_diabete     = serializers.CharField(read_only=True)
+    last_appointment = serializers.SerializerMethodField()
+    last_reason      = serializers.SerializerMethodField()
+    last_status      = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Patient
+        fields = [
+            'id',
+            'patient_id',
+            'email',
+            'age',
+            'type_diabete',
+            'last_appointment',
+            'last_reason',
+            'last_status',
+        ]
+
+    def get_age(self, obj):
+        dob = obj.date_of_birth
+        if not dob:
+            return None
+        today = timezone.now().date()
+        # calcul d'âge classique
+        return today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
+
+    def _get_last_appt(self, patient):
+        return (
+            AppointmentRequest.objects
+            .filter(
+                patient=patient,
+                status__in=['confirmed', 'approved'],
+                date__lte=timezone.now()
+            )
+            .order_by('-date')
+            .first()
+        )
+
+    def get_last_appointment(self, obj):
+        appt = self._get_last_appt(obj)
+        return appt.date if appt else None
+
+    def get_last_reason(self, obj):
+        appt = self._get_last_appt(obj)
+        return appt.reason if appt else None
+
+    def get_last_status(self, obj):
+        appt = self._get_last_appt(obj)
+        return appt.status if appt else None

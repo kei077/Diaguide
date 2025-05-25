@@ -3,6 +3,7 @@ from authentication.models import User
 import uuid
 from medecin.models import Medecin
 from django.utils import timezone
+from django.db.models import Q
 def generate_patient_id():
     return f"PT{uuid.uuid4().hex[:6].upper()}"  # e.g. PT3A1B9F
 
