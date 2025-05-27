@@ -1,99 +1,223 @@
 // Header.tsx
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/use-auth';
 import { useTheme } from '@/contexts/theme-context';
-import { Bell, Search, Sun, Moon } from 'lucide-react';
+import { Bell, Search, Sun, Moon, User, ChevronDown } from 'lucide-react';
 
 /**
- * Composant Header :
- * - Affiche une zone de recherche.
- * - Permet de basculer le thème (clair/sombre).
- * - Affiche une icône de notifications.
- * - Affiche les informations de l’utilisateur (nom, rôle et email, si présent)
- *   ainsi qu’un bouton de logout. Sinon, un bouton Login s’affiche.
+ * Composant Header amélioré :
+ * - Zone de recherche avec animations fluides et suggestions
+ * - Bascule de thème avec transition smooth
+ * - Notifications avec badge animé et dropdown
+ * - Menu utilisateur avec dropdown et avatar
+ * - Micro-interactions et effets visuels avancés
  */
 export function Header() {
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  
+  // États pour les interactions
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const [searchValue, setSearchValue] = useState('');
+  
+  // Refs pour la gestion des clics extérieurs
+  const userMenuRef = useRef<HTMLDivElement>(null);
+  const notificationRef = useRef<HTMLDivElement>(null);
+
+  // Fermeture des menus au clic extérieur
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setIsUserMenuOpen(false);
+      }
+      if (notificationRef.current && !notificationRef.current.contains(event.target as Node)) {
+        setIsNotificationOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Génération de l'avatar utilisateur
+  const getUserInitials = (name: string) => {
+    return name.split(' ').map(n => n[0]).join('').toUpperCase();
+  };
 
   return (
-    <header className="bg-white dark:bg-gray-800 border-b dark:border-gray-700 transition-colors duration-200">
-      <div className="flex h-14 items-center justify-between px-6">
-        {/* Zone de recherche */}
+    <header className="relative bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50 transition-all duration-300 shadow-sm hover:shadow-md">
+      <div className="flex h-16 items-center justify-between px-6 max-w-7xl mx-auto">
+        
+        {/* Zone de recherche améliorée */}
         <div className="flex items-center gap-4">
           <div className="relative group">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 
-              group-hover:text-primary-500 transition-colors duration-300" />
-            <input
-              type="search"
-              placeholder="Search..."
-              className="h-9 w-64 rounded-md border border-gray-200 dark:border-gray-600 pl-9 pr-4 text-sm 
-                     focus:border-primary-500 focus:ring-2 focus:ring-primary-100 focus:outline-none
-                     hover:border-primary-300 transition-all duration-300
-                     dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400"
-            />
+            <div className={`absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-lg blur-xl transition-opacity duration-500 ${isSearchFocused ? 'opacity-100' : 'opacity-0'}`} />
+            <div className="relative">
+              <Search className={`absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transition-all duration-300 ${
+                isSearchFocused 
+                  ? 'text-blue-500 transform scale-110' 
+                  : 'text-gray-400 group-hover:text-blue-400'
+              }`} />
+              <input
+                type="search"
+                placeholder="Search anything..."
+                value={searchValue}
+                onChange={(e) => setSearchValue(e.target.value)}
+                onFocus={() => setIsSearchFocused(true)}
+                onBlur={() => setIsSearchFocused(false)}
+                className={`h-10 w-80 rounded-xl border bg-white/50 dark:bg-gray-800/50 pl-10 pr-4 text-sm backdrop-blur-sm transition-all duration-300 ${
+                  isSearchFocused
+                    ? 'border-blue-500 ring-4 ring-blue-500/20 shadow-lg scale-105 w-96'
+                    : 'border-gray-200 dark:border-gray-600 hover:border-blue-300 hover:shadow-md'
+                } focus:outline-none dark:text-gray-100 dark:placeholder-gray-400`}
+              />
+              {searchValue && (
+                <button
+                  onClick={() => setSearchValue('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+            
+            {/* Suggestions de recherche (simulées) */}
+            {isSearchFocused && searchValue && (
+              <div className="absolute top-full mt-2 w-full bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-600 backdrop-blur-xl z-50 overflow-hidden">
+                <div className="p-2 space-y-1">
+                  {['Dashboard', 'Users', 'Settings', 'Analytics'].filter(item => 
+                    item.toLowerCase().includes(searchValue.toLowerCase())
+                  ).map((item, index) => (
+                    <button
+                      key={index}
+                      className="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 text-sm"
+                    >
+                      {item}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
         {/* Actions du header */}
-        <div className="flex items-center gap-4">
-          {/* Bouton de bascule du thème */}
+        <div className="flex items-center gap-3">
+          
+          {/* Bouton de bascule du thème amélioré */}
           <Button
             variant="ghost"
             size="icon"
             onClick={toggleTheme}
-            className="relative hover:bg-primary-50 dark:hover:bg-gray-700 hover:text-primary-600 
-                     active:scale-95 transform transition-all duration-300"
+            className="relative group h-10 w-10 rounded-xl hover:bg-gradient-to-br hover:from-yellow-50 hover:to-orange-50 dark:hover:from-gray-700 dark:hover:to-gray-600 transition-all duration-500 hover:scale-110 active:scale-95"
             title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
           >
+            <div className="absolute inset-0 bg-gradient-to-br from-yellow-400/20 to-orange-400/20 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             {theme === 'light' ? (
-              <Moon className="h-5 w-5 transition-transform duration-200 hover:rotate-12" />
+              <Moon className="h-5 w-5 relative z-10 transition-all duration-500 group-hover:rotate-12 group-hover:text-blue-600" />
             ) : (
-              <Sun className="h-5 w-5 transition-transform duration-200 hover:rotate-90" />
+              <Sun className="h-5 w-5 relative z-10 transition-all duration-500 group-hover:rotate-90 group-hover:text-yellow-500" />
             )}
           </Button>
 
-          {/* Bouton de notifications */}
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="relative hover:bg-primary-50 dark:hover:bg-gray-700 hover:text-primary-600 
-                     active:scale-95 transform transition-all duration-300"
-          >
-            <Bell className="h-5 w-5" />
-            <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center 
-                       rounded-full bg-accent-500 text-[10px] text-white animate-pulse">
-              3
-            </span>
-          </Button>
+          {/* Bouton de notifications amélioré */}
+          <div className="relative" ref={notificationRef}>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => setIsNotificationOpen(!isNotificationOpen)}
+              className="relative group h-10 w-10 rounded-xl hover:bg-gradient-to-br hover:from-red-50 hover:to-pink-50 dark:hover:from-gray-700 dark:hover:to-gray-600 transition-all duration-300 hover:scale-110 active:scale-95"
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-red-400/20 to-pink-400/20 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <Bell className="h-5 w-5 relative z-10 transition-all duration-300 group-hover:rotate-12 group-hover:text-red-500" />
+              <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-br from-red-500 to-pink-500 text-[10px] text-white font-bold shadow-lg animate-pulse">
+                3
+              </span>
+            </Button>
 
-          {/* Affichage des infos utilisateur et bouton logout ou lien login */}
-          {user ? (
-            <div className="flex items-center gap-4">
-              <div className="text-sm">
-                <p className="font-medium text-gray-700 dark:text-gray-200">{user.name}</p>
-                <p className="text-gray-500 dark:text-gray-400">{user.role}</p>
-                {user.email && (
-                  <p className="text-gray-500 dark:text-gray-400 text-xs">{user.email}</p>
-                )}
+            {/* Dropdown des notifications */}
+            {isNotificationOpen && (
+              <div className="absolute right-0 top-full mt-2 w-80 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-600 backdrop-blur-xl z-50 overflow-hidden animate-in slide-in-from-top-2 duration-200">
+                <div className="p-4 border-b border-gray-200 dark:border-gray-600">
+                  <h3 className="font-semibold text-gray-900 dark:text-gray-100">Notifications</h3>
+                </div>
+                <div className="max-h-64 overflow-y-auto">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border-b border-gray-100 dark:border-gray-700 last:border-b-0">
+                      <p className="text-sm text-gray-900 dark:text-gray-100">Notification {i}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Il y a {i} minute{i > 1 ? 's' : ''}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
-              <Button 
-                onClick={logout} 
-                variant="outline" 
-                size="sm"
-                className="hover:bg-accent-50 dark:hover:bg-gray-700 hover:text-accent-600 hover:border-accent-200 
-                         active:scale-95 transform transition-all duration-300
-                         dark:border-gray-600 dark:text-gray-200"
+            )}
+          </div>
+
+          {/* Affichage des infos utilisateur avec menu dropdown */}
+          {user ? (
+            <div className="relative" ref={userMenuRef}>
+              <button
+                onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                className="flex items-center gap-3 px-4 py-2 rounded-xl hover:bg-gradient-to-br hover:from-blue-50 hover:to-indigo-50 dark:hover:from-gray-700 dark:hover:to-gray-600 transition-all duration-300 hover:scale-105 active:scale-95 group"
               >
-                Logout
-              </Button>
+                {/* Avatar utilisateur */}
+                <div className="relative">
+                  <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white font-semibold text-sm shadow-lg">
+                    {getUserInitials(user.name)}
+                  </div>
+                  <div className="absolute inset-0 rounded-full bg-gradient-to-br from-blue-400/50 to-purple-400/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 animate-ping" />
+                </div>
+                
+                <div className="text-left hidden sm:block">
+                  <p className="font-medium text-gray-700 dark:text-gray-200 text-sm">{user.name}</p>
+                  <p className="text-gray-500 dark:text-gray-400 text-xs">{user.role}</p>
+                </div>
+                
+                <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform duration-300 ${isUserMenuOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {/* Menu dropdown utilisateur */}
+              {isUserMenuOpen && (
+                <div className="absolute right-0 top-full mt-2 w-64 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-600 backdrop-blur-xl z-50 overflow-hidden animate-in slide-in-from-top-2 duration-200">
+                  <div className="p-4 border-b border-gray-200 dark:border-gray-600">
+                    <div className="flex items-center gap-3">
+                      <div className="h-12 w-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold">
+                        {getUserInitials(user.name)}
+                      </div>
+                      <div>
+                        <p className="font-semibold text-gray-900 dark:text-gray-100">{user.name}</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">{user.role}</p>
+                        {user.email && (
+                          <p className="text-xs text-gray-500 dark:text-gray-400">{user.email}</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="p-2">
+                    <button className="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 text-sm flex items-center gap-2">
+                      <User className="h-4 w-4" />
+                     <a href='/profile'> Profile </a>
+                    </button>
+                    <button 
+                      onClick={logout}
+                      className="w-full text-left px-3 py-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 transition-all duration-200 text-sm mt-1"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           ) : (
             <Link to="/login">
-              <Button className="hover:bg-primary-700 active:scale-95 transform transition-all duration-300 hover:shadow-glow">
-                Login
+              <Button className="relative group bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white border-0 px-6 py-2 rounded-xl font-medium transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl">
+                <span className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-400 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-lg" />
+                <span className="relative z-10">Login</span>
               </Button>
             </Link>
           )}
