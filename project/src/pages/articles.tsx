@@ -36,7 +36,9 @@ const articleSchema = z.object({
   ])
 });
 
-type ArticleFormValues = z.infer<typeof articleSchema>;
+type ArticleFormValues = Omit<z.infer<typeof articleSchema>, 'tags'> & {
+  tags: string | string[];
+};
 
 type Article = ArticleFormValues & {
   status: 'published';

@@ -1,90 +1,95 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { Button } from '@/components/ui/button';
-import { Activity, AlertCircle } from 'lucide-react';
-import axios from 'axios';
-import { useAuth } from '@/contexts/auth-context'; // <- Pour accéder à reloadUser
+"use client"
+import { useState } from "react"
+import { useNavigate } from "react-router-dom"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import * as z from "zod"
+import { Button } from "@/components/ui/button"
+import { Activity, AlertCircle } from "lucide-react"
+import axios from "axios"
+import { useAuth } from "@/contexts/auth-context" // <- Pour accéder à reloadUser
 
 const schema = z.object({
-  email: z.string().min(1, 'Email is required'),
-  password: z.string().min(1, 'Password is required'),
-});
+  email: z.string().min(1, "Email is required"),
+  password: z.string().min(1, "Password is required"),
+})
 
-type FormData = z.infer<typeof schema>;
+type FormData = z.infer<typeof schema>
 
 export function LoginPage() {
-  const navigate = useNavigate();
-  const { reloadUser } = useAuth(); // On récupère la méthode reloadUser
-  const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate()
+  const { reloadUser } = useAuth() // On récupère la méthode reloadUser
+  const [error, setError] = useState<string | null>(null)
 
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<FormData>({
     resolver: zodResolver(schema),
-  });
+  })
 
   const onSubmit = async (data: FormData) => {
-    setError(null);
+    setError(null)
     try {
-      const response = await axios.post('http://127.0.0.1:8000/api/auth/login/', {
+      const response = await axios.post("http://127.0.0.1:8000/api/auth/login/", {
         email: data.email,
-        password: data.password
-      });
+        password: data.password,
+      })
 
-      console.log("Réponse du backend:", response.data);
+      console.log("Réponse du backend:", response.data)
 
-      let { token, email, nom, prenom, role } = response.data;
+      const { token, email, nom, prenom, role } = response.data
 
       // Mapper "medecin" à "doctor" (si backend renvoie "medecin")
-      const mappedRole: "patient" | "doctor" | "admin" =
-        role === "medecin" ? "doctor" : role;
+      const mappedRole: "patient" | "doctor" | "admin" = role === "medecin" ? "doctor" : role
 
       // Stockage dans le localStorage
-      localStorage.setItem('token', token);
-      localStorage.setItem('email', email);
-      localStorage.setItem('role', mappedRole);
-      localStorage.setItem('nom', nom);
-      localStorage.setItem('prenom', prenom);
+      localStorage.setItem("token", token)
+      localStorage.setItem("email", email)
+      localStorage.setItem("role", mappedRole)
+      localStorage.setItem("nom", nom)
+      localStorage.setItem("prenom", prenom)
 
       // ICI on force le AuthContext à relire l'utilisateur
-      localStorage.setItem('user', JSON.stringify({
-        id: email,
-        email,
-        role: mappedRole,
-        name: nom + ' ' + prenom,
-        // profilePicture éventuellement si l'API la renvoie
-      }));
+      localStorage.setItem(
+        "user",
+        JSON.stringify({
+          id: email,
+          email,
+          role: mappedRole,
+          name: nom + " " + prenom,
+          // profilePicture éventuellement si l'API la renvoie
+        }),
+      )
 
-      console.log("Stockage local effectué, appel de reloadUser()");
-      reloadUser(); // Mise à jour du state user dans AuthProvider
+      console.log("Stockage local effectué, appel de reloadUser()")
+      reloadUser() // Mise à jour du state user dans AuthProvider
 
-      console.log(`Utilisateur est ${mappedRole}, redirection vers /dashboard`);
-      navigate('/dashboard');
+      console.log(`Utilisateur est ${mappedRole}, redirection vers /dashboard`)
+      navigate("/dashboard")
     } catch (err: any) {
       if (err.response) {
-        console.error("Erreur lors du login (response data):", err.response.data);
+        console.error("Erreur lors du login (response data):", err.response.data)
       } else if (err.request) {
-        console.error("Aucune réponse reçue:", err.request);
+        console.error("Aucune réponse reçue:", err.request)
       } else {
-        console.error("Erreur lors de la configuration de la requête:", err.message);
+        console.error("Erreur lors de la configuration de la requête:", err.message)
       }
-      setError('Invalid credentials. Please try again.');
+      setError("Invalid credentials. Please try again.")
     }
-  };
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col justify-center py-12 sm:px-6 lg:px-8 transition-colors duration-200">
+    <div className="min-h-screen bg-green-50 dark:bg-gray-900 flex flex-col justify-center py-12 sm:px-6 lg:px-8 transition-colors duration-200">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
-          <Activity className="h-12 w-12 text-primary-600 dark:text-primary-400" />
+          <Activity className="h-12 w-12 text-green-600 dark:text-green-400" />
         </div>
-        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
-          Sign in to DiaGuide
-        </h2>
+        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">Sign in to DiaGuide</h2>
       </div>
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white dark:bg-gray-800 py-8 px-4 shadow-lg rounded-lg sm:px-10 transition-all duration-200">
+        <div className="bg-white dark:bg-gray-800 py-8 px-4 shadow-lg rounded-lg sm:px-10 transition-all duration-200 border border-green-100 dark:border-gray-700">
           {error && (
             <div className="mb-4 p-3 rounded-md bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800">
               <div className="flex items-center gap-2 text-red-700 dark:text-red-400">
@@ -98,11 +103,11 @@ export function LoginPage() {
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Email</label>
               <div className="mt-1">
                 <input
-                  {...register('email')}
+                  {...register("email")}
                   type="text"
                   className="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm 
-                    placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-primary-500 focus:border-primary-500 
-                    dark:bg-gray-700 dark:text-white sm:text-sm"
+                    placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-green-500 focus:border-green-500 
+                    dark:bg-gray-700 dark:text-white sm:text-sm transition-colors duration-200"
                 />
                 {errors.email && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.email.message}</p>}
               </div>
@@ -111,22 +116,24 @@ export function LoginPage() {
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Password</label>
               <div className="mt-1">
                 <input
-                  {...register('password')}
+                  {...register("password")}
                   type="password"
                   className="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm 
-                    placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-primary-500 focus:border-primary-500 
-                    dark:bg-gray-700 dark:text-white sm:text-sm"
+                    placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-green-500 focus:border-green-500 
+                    dark:bg-gray-700 dark:text-white sm:text-sm transition-colors duration-200"
                 />
-                {errors.password && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.password.message}</p>}
+                {errors.password && (
+                  <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.password.message}</p>
+                )}
               </div>
             </div>
             <div>
-              <Button 
-                type="submit" 
-                className="w-full flex justify-center"
+              <Button
+                type="submit"
+                className="w-full flex justify-center bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={isSubmitting}
               >
-                {isSubmitting ? 'Signing in...' : 'Sign in'}
+                {isSubmitting ? "Signing in..." : "Sign in"}
               </Button>
             </div>
           </form>
@@ -136,15 +143,16 @@ export function LoginPage() {
                 <div className="w-full border-t border-gray-300 dark:border-gray-600" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">
-                  Demo Accounts
-                </span>
+                <span className="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">Demo Accounts</span>
               </div>
             </div>
             <div className="mt-4 text-center">
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                Don't have an account?{' '}
-                <a href="/register" className="text-primary-600 hover:underline dark:text-primary-400">
+                {"Don't have an account? "}
+                <a
+                  href="/register"
+                  className="text-green-600 hover:text-green-700 hover:underline dark:text-green-400 dark:hover:text-green-300 transition-colors duration-200"
+                >
                   Sign up
                 </a>
               </p>
@@ -153,6 +161,5 @@ export function LoginPage() {
         </div>
       </div>
     </div>
-  );
+  )
 }
-//     </div>
