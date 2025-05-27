@@ -6,13 +6,13 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated
-from patient.serializers import PatientSerializer, PatientUpdateSerializer
+from patient.serializers import PatientSerializer, PatientUpdateSerializer,PatientProfileSerializer
 from medecin.serializers import MedecinSerializer, MedecinUpdateSerializer, LangageSerializer
 from django.core.mail import send_mail
 from django.conf import settings
 from django.views.decorators.http import condition
 from django.utils.decorators import method_decorator
-
+from medecin.models import Langage
 class ChangePasswordView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -44,36 +44,83 @@ class MyProfileView(views.APIView):
             "role": user.role,
         }
 
-        if user.role == 'patient':
-            from patient.serializers import PatientSerializer
-            profile = PatientSerializer(user.patient_account).data
-        elif user.role == 'medecin':
-            from medecin.serializers import MedecinSerializer
-            profile = MedecinSerializer(user.medecin_account).data
-        else:
-            profile = {}
+        try:
+            if user.role == 'patient' and hasattr(user, 'patient_account'):
+                from patient.serializers import PatientProfileSerializer
+                data["profile"] = PatientProfileSerializer(
+                    user.patient_account,
+                    context={'request': request}  # Important pour les URLs absolues
+                ).data
 
-        data["profile"] = profile
+            elif user.role == 'medecin' and hasattr(user, 'medecin_account'):
+                from medecin.serializers import MedecinProfileSerializer
+                data["profile"] = MedecinProfileSerializer(user.medecin_account).data
+        except Exception as e:
+            print(f"Error getting profile: {str(e)}")
+            data["profile"] = {}
+
         return Response(data)
 
     def put(self, request):
         user = request.user
-        user.nom = request.data.get('nom', user.nom)
-        user.prenom = request.data.get('prenom', user.prenom)
-        user.save()
+        response_data = {"message": "Profile updated successfully"}
+        
+        try:
+            # Update user fields
+            if 'nom' in request.data:
+                user.nom = request.data['nom']
+            if 'prenom' in request.data:
+                user.prenom = request.data['prenom']
+            user.save()
 
-        if user.role == 'patient':
-            serializer = PatientUpdateSerializer(user.patient_account, data=request.data, partial=True)
-        elif user.role == 'medecin':
-            serializer = MedecinUpdateSerializer(user.medecin_account, data=request.data, partial=True)
-        else:
-            return Response({"error": "Invalid role"}, status=400)
+            # Update profile
+            if 'profile' in request.data:
+                if user.role == 'patient' and hasattr(user, 'patient_account'):
+                    serializer = PatientUpdateSerializer(
+                        user.patient_account,
+                        data=request.data['profile'],
+                        partial=True
+                    )
+                    if serializer.is_valid():
+                        serializer.save()
+                    else:
+                        return Response(serializer.errors, status=400)
+                
+                elif user.role == 'medecin' and hasattr(user, 'medecin_account'):
+                    # Gestion spéciale pour les langues
+                    profile_data = request.data['profile'].copy()
+                    langues_data = profile_data.pop('langues', None)
+                    
+                    serializer = MedecinUpdateSerializer(
+                        user.medecin_account,
+                        data=profile_data,
+                        partial=True
+                    )
+                    
+                    if serializer.is_valid():
+                        medecin = serializer.save()
+                        
+                        # Mise à jour des langues si fournies
+                        if langues_data is not None:
+                            if isinstance(langues_data, str):
+                                # Cas où les langues sont envoyées comme string séparée par virgules
+                                langues = [l.strip() for l in langues_data.split(',') if l.strip()]
+                                medecin.langues.clear()
+                                for lang in langues:
+                                    lang_obj, _ = Langage.objects.get_or_create(nom_lang=lang)
+                                    medecin.langues.add(lang_obj)
+                            elif isinstance(langues_data, list):
+                                # Cas où les langues sont envoyées comme liste d'IDs
+                                medecin.langues.set(langues_data)
+                        
+                    else:
+                        return Response(serializer.errors, status=400)
 
-        if serializer.is_valid():
-            serializer.save()
-            return Response({"message": "Profile updated successfully"})
-        return Response(serializer.errors, status=400)
+        except Exception as e:
+            print(f"Error updating profile: {str(e)}")
+            return Response({"error": str(e)}, status=400)
 
+        return Response(response_data)
 
 class UserRegistrationView(APIView):
     def post(self, request):

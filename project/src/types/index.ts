@@ -33,6 +33,13 @@ export interface DoctorProfile extends User {
   experience: number;
   about: string;
   consultationFee?: number;
+  id: string;
+  email: string;
+  name: string;
+  role: "medecin";
+  phone: string;
+  profilePicture: string;
+
 }
 
 export interface AdminProfile extends User {

@@ -14,7 +14,12 @@ import {
   Trash2,
   Edit2,
   Search,
-  AlertCircle
+  AlertCircle,
+  Calendar,
+  User,
+  FileText,
+  Plus,
+  X
 } from 'lucide-react';
 
 // Définir le schéma de validation
@@ -31,7 +36,9 @@ const articleSchema = z.object({
   ])
 });
 
-type ArticleFormValues = z.infer<typeof articleSchema>;
+type ArticleFormValues = Omit<z.infer<typeof articleSchema>, 'tags'> & {
+  tags: string | string[];
+};
 
 type Article = ArticleFormValues & {
   status: 'published';
@@ -52,10 +59,11 @@ interface BackArticle {
   auteur_id: number;
   date_publication: string;
   auteur: {
-    id: number;  // Notez que c'est un number
+    id: number;
     nom: string;
     email: string;
     prenom: string;
+    full_name: string;
   };
 }
 
@@ -108,141 +116,203 @@ function ArticleForm({
   };
 
   return (
-    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
-      {/* TITLE */}
-      <div>
-        <label className="block text-sm font-medium">Title</label>
-        <input
-          type="text"
-          {...register('title')}
-          className="mt-1 block w-full rounded-md border px-3 py-2"
-          placeholder="Enter article title"
-        />
-        {errors.title && (
-          <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
-            <AlertCircle className="h-4 w-4" />
-            {errors.title.message}
-          </p>
-        )}
+    <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+      <div className="bg-gradient-to-r from-emerald-500 to-teal-600 px-8 py-6">
+        <h2 className="text-2xl font-bold text-white flex items-center gap-3">
+          <FileText className="h-6 w-6" />
+          {initialData ? 'Modifier l\'article' : 'New article'}
+        </h2>
+        <p className="text-emerald-100 mt-1">
+          {initialData ? 'Apportez vos modifications ci-dessous' : 'Create a new blog article'}
+        </p>
       </div>
 
-      {/* SUMMARY */}
-      <div>
-        <label className="block text-sm font-medium">Summary</label>
-        <textarea
-          {...register('summary')}
-          rows={3}
-          className="mt-1 block w-full rounded-md border px-3 py-2"
-          placeholder="Brief summary"
-        />
-        {errors.summary && (
-          <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
-            <AlertCircle className="h-4 w-4" />
-            {errors.summary.message}
-          </p>
-        )}
-      </div>
+      <form onSubmit={handleSubmit(handleFormSubmit)} className="p-8 space-y-8">
+        {/* TITLE */}
+        <div className="space-y-2">
+          <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+            <PenSquare className="h-4 w-4 text-emerald-600" />
+            Title 
+          </label>
+          <input
+            type="text"
+            {...register('title')}
+            className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 transition-all duration-200 text-gray-900 placeholder-gray-500"
+            placeholder="Enter a catchy title..."
+          />
+          {errors.title && (
+            <p className="text-red-500 text-sm flex items-center gap-2 bg-red-50 px-3 py-2 rounded-lg">
+              <AlertCircle className="h-4 w-4" />
+              {errors.title.message}
+            </p>
+          )}
+        </div>
 
-      {/* CONTENT */}
-      <div>
-        <label className="block text-sm font-medium">Content</label>
-        <textarea
-          {...register('content')}
-          rows={10}
-          className="mt-1 block w-full rounded-md border px-3 py-2 font-mono"
-          placeholder="Write here…"
-        />
-        {errors.content && (
-          <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
-            <AlertCircle className="h-4 w-4" />
-            {errors.content.message}
-          </p>
-        )}
-      </div>
+        {/* SUMMARY */}
+        <div className="space-y-2">
+          <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+            <FileText className="h-4 w-4 text-emerald-600" />
+            Summary
+          </label>
+          <textarea
+            {...register('summary')}
+            rows={4}
+            className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 transition-all duration-200 text-gray-900 placeholder-gray-500 resize-none"
+            placeholder="A captivating summary of your article..."
+          />
+          {errors.summary && (
+            <p className="text-red-500 text-sm flex items-center gap-2 bg-red-50 px-3 py-2 rounded-lg">
+              <AlertCircle className="h-4 w-4" />
+              {errors.summary.message}
+            </p>
+          )}
+        </div>
 
-      {/* COVER IMAGE & VIDEO */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <label className="block text-sm font-medium">Cover Image URL</label>
-          <div className="mt-1 flex items-center gap-2">
-            <ImageIcon className="h-5 w-5 text-gray-400" />
+        {/* CONTENT */}
+        <div className="space-y-2">
+          <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+            <Edit2 className="h-4 w-4 text-emerald-600" />
+            Content
+          </label>
+          <textarea
+            {...register('content')}
+            rows={12}
+            className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 transition-all duration-200 text-gray-900 placeholder-gray-500 font-mono text-sm resize-none"
+            placeholder="Write your article here..."
+          />
+          {errors.content && (
+            <p className="text-red-500 text-sm flex items-center gap-2 bg-red-50 px-3 py-2 rounded-lg">
+              <AlertCircle className="h-4 w-4" />
+              {errors.content.message}
+            </p>
+          )}
+        </div>
+
+        {/* MEDIA SECTION */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* COVER IMAGE */}
+          <div className="space-y-3">
+            <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+              <ImageIcon className="h-4 w-4 text-emerald-600" />
+              Cover Image URL 
+            </label>
             <input
               type="text"
               {...register('coverImage')}
-              className="w-full rounded-md border px-3 py-2"
-              placeholder="https://..."
+              className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 transition-all duration-200 text-gray-900 placeholder-gray-500"
+              placeholder="https://exemple.com/image.jpg"
             />
+            {coverImage && (
+              <div className="relative group">
+                <div className="h-48 w-full overflow-hidden rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 shadow-inner">
+                  <img
+                    src={coverImage}
+                    alt="Aperçu"
+                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    onError={(e) =>
+                      (e.currentTarget.src =
+                        'https://via.placeholder.com/800x400/f3f4f6/6b7280?text=Image+non+trouvée')
+                    }
+                  />
+                </div>
+                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 rounded-xl flex items-center justify-center">
+                  <span className="text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 font-medium">
+                    Image preview
+                  </span>
+                </div>
+              </div>
+            )}
+            {errors.coverImage && (
+              <p className="text-red-500 text-sm flex items-center gap-2 bg-red-50 px-3 py-2 rounded-lg">
+                <AlertCircle className="h-4 w-4" />
+                {errors.coverImage.message}
+              </p>
+            )}
           </div>
-          {coverImage && (
-            <div className="mt-2 h-40 w-full overflow-hidden rounded-lg bg-gray-100">
-              <img
-                src={coverImage}
-                alt="Preview"
-                className="h-full w-full object-cover"
-                onError={(e) =>
-                  (e.currentTarget.src =
-                    'https://via.placeholder.com/800x400?text=Invalid+URL')
-                }
-              />
-            </div>
-          )}
-          {errors.coverImage && (
-            <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
-              <AlertCircle className="h-4 w-4" />
-              {errors.coverImage.message}
-            </p>
-          )}
-        </div>
-        <div>
-          <label className="block text-sm font-medium">Video URL</label>
-          <div className="mt-1 flex items-center gap-2">
-            <Video className="h-5 w-5 text-gray-400" />
+
+          {/* VIDEO URL */}
+          <div className="space-y-3">
+            <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+              <Video className="h-4 w-4 text-emerald-600" />
+              Video URL
+            </label>
             <input
               type="text"
               {...register('videoUrl')}
-              className="w-full rounded-md border px-3 py-2"
-              placeholder="https://..."
+              className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 transition-all duration-200 text-gray-900 placeholder-gray-500"
+              placeholder="https://youtube.com/watch?v=..."
             />
+            {videoUrl && (
+              <div className="p-4 bg-emerald-50 rounded-xl border-2 border-emerald-200">
+                <div className="flex items-center gap-3">
+                  <Video className="h-6 w-6 text-emerald-600" />
+                  <div>
+                    <p className="text-sm font-medium text-emerald-800">Video added</p>
+                    <p className="text-xs text-emerald-600 truncate max-w-xs">{videoUrl}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+            {errors.videoUrl && (
+              <p className="text-red-500 text-sm flex items-center gap-2 bg-red-50 px-3 py-2 rounded-lg">
+                <AlertCircle className="h-4 w-4" />
+                {errors.videoUrl.message}
+              </p>
+            )}
           </div>
-          {errors.videoUrl && (
-            <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
-              <AlertCircle className="h-4 w-4" />
-              {errors.videoUrl.message}
-            </p>
-          )}
         </div>
-      </div>
 
-      {/* TAGS */}
-      <div>
-        <label className="block text-sm font-medium">Tags (comma separated)</label>
-        <div className="mt-1 flex items-center gap-2">
-          <Tags className="h-5 w-5 text-gray-400" />
+        {/* TAGS */}
+        <div className="space-y-2">
+          <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+            <Tags className="h-4 w-4 text-emerald-600" />
+            Tags 
+          </label>
           <input
             type="text"
             {...register('tags')}
-            className="w-full rounded-md border px-3 py-2"
-            placeholder="tag1, tag2, ..."
+            className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 transition-all duration-200 text-gray-900 placeholder-gray-500"
+            placeholder="santé, médecine, conseils..."
           />
+          {errors.tags && (
+            <p className="text-red-500 text-sm flex items-center gap-2 bg-red-50 px-3 py-2 rounded-lg">
+              <AlertCircle className="h-4 w-4" />
+              {errors.tags.message}
+            </p>
+          )}
         </div>
-        {errors.tags && (
-          <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
-            <AlertCircle className="h-4 w-4" />
-            {errors.tags.message}
-          </p>
-        )}
-      </div>
 
-      {/* ACTIONS */}
-      <div className="flex justify-end gap-3">
-        <Button variant="outline" type="button" onClick={onCancel}>
-          Cancel
-        </Button>
-        <Button type="submit" disabled={isSubmitting}>
-          Publish Article
-        </Button>
-      </div>
-    </form>
+        {/* ACTIONS */}
+        <div className="flex justify-end gap-4 pt-6 border-t border-gray-200">
+          <Button 
+            variant="outline" 
+            type="button" 
+            onClick={onCancel}
+            className="px-6 py-3 border-2 border-gray-300 hover:border-gray-400 hover:bg-gray-50 transition-all duration-200"
+          >
+            <X className="h-4 w-4 mr-2" />
+            Cancel
+          </Button>
+          <Button 
+            type="submit" 
+            disabled={isSubmitting}
+            className="px-8 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50"
+          >
+            {isSubmitting ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2" />
+                Publishing...
+              </>
+            ) : (
+              <>
+                <Plus className="h-4 w-4 mr-2" />
+                Publish Article
+              </>
+            )}
+          </Button>
+        </div>
+      </form>
+    </div>
   );
 }
 
@@ -255,31 +325,92 @@ function ArticleCard({
   onEdit: (a: Article) => void;
   onDelete: (id: string) => void;
 }) {
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('fr-FR', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
   return (
-    <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition">
+    <div className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-emerald-200">
       {article.coverImage && (
-        <div className="relative h-48 overflow-hidden rounded-t-lg">
+        <div className="relative h-56 overflow-hidden">
           <img
             src={article.coverImage}
             alt={article.title}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
           />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         </div>
       )}
-      <div className="p-4">
-        <div className="flex justify-between items-center mb-2">
-          <h3 className="font-semibold">{article.title}</h3>
-          <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">
+      
+      <div className="p-6 space-y-4">
+        <div className="flex justify-between items-start gap-3">
+          <h3 className="font-bold text-lg text-gray-900 line-clamp-2 group-hover:text-emerald-700 transition-colors duration-200">
+            {article.title}
+          </h3>
+          <span className="px-3 py-1 text-xs font-semibold rounded-full bg-emerald-100 text-emerald-800 whitespace-nowrap">
             Published
           </span>
         </div>
-        <p className="text-sm text-gray-600 mb-4">{article.summary}</p>
-        <div className="flex justify-end gap-2">
-          <Button variant="ghost" size="sm" onClick={() => onEdit(article)}>
-            <Edit2 className="h-4 w-4" />
+        
+        <p className="text-gray-600 text-sm line-clamp-3 leading-relaxed">
+          {article.summary}
+        </p>
+
+        {/* Tags */}
+        {article.tags && article.tags.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {article.tags.slice(0, 3).map((tag, index) => (
+              <span 
+                key={index} 
+                className="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded-lg hover:bg-emerald-50 hover:text-emerald-700 transition-colors duration-200"
+              >
+                {tag}
+              </span>
+            ))}
+            {article.tags.length > 3 && (
+              <span className="px-2 py-1 text-xs bg-gray-100 text-gray-500 rounded-lg">
+                +{article.tags.length - 3}
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* Metadata */}
+        <div className="flex items-center gap-4 text-xs text-gray-500 pt-2 border-t border-gray-100">
+          <div className="flex items-center gap-1">
+            <User className="h-3 w-3" />
+            
+            {article.authorName}
+          </div>
+          <div className="flex items-center gap-1">
+            <Calendar className="h-3 w-3" />
+            {formatDate(article.createdAt)}
+          </div>
+        </div>
+
+        {/* Actions */}
+        <div className="flex justify-end gap-2 pt-4">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => onEdit(article)}
+            className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 transition-all duration-200"
+          >
+            <Edit2 className="h-4 w-4 mr-1" />
+            Modify
           </Button>
-          <Button variant="ghost" size="sm" onClick={() => onDelete(article.id)}>
-            <Trash2 className="h-4 w-4" />
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => onDelete(article.id)}
+            className="text-red-500 hover:text-red-600 hover:bg-red-50 transition-all duration-200"
+          >
+            <Trash2 className="h-4 w-4 mr-1" />
+            Delete
           </Button>
         </div>
       </div>
@@ -307,15 +438,11 @@ export function ArticlesPage() {
       setLoading(true);
       try {
         const token = localStorage.getItem('token') || '';
-        console.log('[DEBUG] Token:', token);
         const res = await axios.get<BackArticle[]>(
           'http://localhost:8000/content/articles/',
           { headers: { Authorization: `Token ${token}` }, withCredentials: true }
         );
-        console.log('[DEBUG] id user', user.id);
-        console.log('[DEBUG] Réponse API brute:', res.data);
-        // Log des données brutes
-        
+        console.log('Fetched articles:', res.data);
         const mapped: Article[] = res.data.filter(b => b.auteur.email === user.id)
         .map(b => ({
           id: b.id.toString(),
@@ -326,12 +453,11 @@ export function ArticlesPage() {
           videoUrl: b.video || '',
           tags: b.keywords.split(',').map(t => t.trim()),
           status: 'published',
-          authorId: b.auteur.id.toString(), // Conversion en string pour le state
-          authorName: `${b.auteur.prenom} ${b.auteur.nom}`,
+          authorId: b.auteur.id.toString(),
+          authorName: `${b.auteur.full_name}` ,
           createdAt: b.date_publication,
           updatedAt: b.date_publication
-        })
-      );
+        }));
         
         setArticles(mapped);
       } catch (err) {
@@ -356,22 +482,11 @@ export function ArticlesPage() {
       keywords: Array.isArray(formData.tags) ? formData.tags.join(',') : formData.tags,
     };
 
-    console.log('Soumission article - Données envoyées:', {
-      payload: payload,
-      authorInfo: {
-        authorId: formData.authorId,
-        authorName: formData.authorName
-      },
-      isEdit: !!editing,
-      editingId: editing?.id
-    });
-
     try {
       const baseUrl = 'http://localhost:8000/content/articles/';
       let response;
 
       if (editing) {
-        console.log(`Mise à jour article existant ID: ${editing.id}`);
         response = await axios.put(
           `${baseUrl}${editing.id}/`,
           payload,
@@ -381,7 +496,6 @@ export function ArticlesPage() {
           }
         );
       } else {
-        console.log('Création nouvel article');
         response = await axios.post(
           baseUrl,
           payload,
@@ -391,8 +505,6 @@ export function ArticlesPage() {
           }
         );
       }
-
-      console.log('Réponse API après soumission:', response.data);
 
       const b = response.data;
       const updatedArticle: Article = {
@@ -410,41 +522,22 @@ export function ArticlesPage() {
         updatedAt: new Date().toISOString()
       };
 
-      console.log('Article mis à jour/local:', updatedArticle);
-
       setArticles(prev =>
         editing
-          ? prev.map(a => {
-              if (a.id === updatedArticle.id) {
-                console.log('Remplacement article existant:', a, 'par:', updatedArticle);
-                return updatedArticle;
-              }
-              return a;
-            })
+          ? prev.map(a => a.id === updatedArticle.id ? updatedArticle : a)
           : [updatedArticle, ...prev]
       );
 
       setIsCreating(false);
       setEditing(null);
     } catch (err) {
-      console.error('Erreur lors de la sauvegarde:', {
-        error: err,
-        payload: payload,
-        context: {
-          isEditing: !!editing,
-          articleId: editing?.id,
-          authorInfo: {
-            id: formData.authorId,
-            name: formData.authorName
-          }
-        }
-      });
+      console.error('Erreur lors de la sauvegarde:', err);
       alert('Erreur lors de la sauvegarde');
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Supprimer cet article ?')) return;
+    if (!confirm('Êtes-vous sûr de vouloir supprimer cet article ? Cette action est irréversible.')) return;
     
     const token = localStorage.getItem('token') || '';
     try {
@@ -454,7 +547,7 @@ export function ArticlesPage() {
       );
       setArticles(prev => prev.filter(a => a.id !== id));
     } catch (err) {
-      alert('Impossible de supprimer');
+      alert('Impossible de supprimer l\'article');
       console.error('Error deleting article:', err);
     }
   };
@@ -462,74 +555,145 @@ export function ArticlesPage() {
   const filteredArticles = articles.filter(a => {
     return (
       a.title.toLowerCase().includes(search.toLowerCase()) ||
-      a.summary.toLowerCase().includes(search.toLowerCase())
+      a.summary.toLowerCase().includes(search.toLowerCase()) ||
+      a.tags.some(tag => tag.toLowerCase().includes(search.toLowerCase()))
     );
   });
 
-  if (loading) return <p>Chargement…</p>;
-  if (error) return <p className="text-red-600">{error}</p>;
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-emerald-500 border-t-transparent mx-auto"></div>
+          <p className="text-gray-600 font-medium">Chargement de vos articles...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center space-y-4 max-w-md mx-auto">
+          <AlertCircle className="h-16 w-16 text-red-500 mx-auto" />
+          <h2 className="text-xl font-semibold text-gray-900">Erreur de chargement</h2>
+          <p className="text-red-600 bg-red-50 px-4 py-2 rounded-lg">{error}</p>
+          <Button 
+            onClick={() => window.location.reload()} 
+            className="bg-emerald-500 hover:bg-emerald-600"
+          >
+            Réessayer
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="max-w-5xl mx-auto py-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold">Articles</h1>
-          <p className="text-gray-500">Écrivez et gérez vos articles</p>
-        </div>
-        <Button
-          onClick={() => {
-            setIsCreating(!isCreating);
-            setEditing(null);
-          }}
-        >
-          <PenSquare className="h-5 w-5 mr-2" />
-          {isCreating ? 'Annuler' : 'Nouveau'}
-        </Button>
-      </div>
-
-      {isCreating ? (
-        <ArticleForm
-          initialData={editing || undefined}
-          onSubmit={handleSubmit}
-          onCancel={() => {
-            setIsCreating(false);
-            setEditing(null);
-          }}
-        />
-      ) : (
-        <>
-          <div className="flex gap-4 bg-white p-4 rounded shadow">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-2 h-5 w-5 text-gray-400" />
-              <input
-                type="search"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Rechercher…"
-                className="w-full pl-10 pr-4 py-2 border rounded"
-              />
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-50">
+      <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
+        {/* Header */}
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+            <div className="space-y-2">
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+                My Articles
+              </h1>
+              <p className="text-gray-600 text-lg">
+                Write and manage your articles easily
+              </p>
+              <div className="flex items-center gap-4 text-sm text-gray-500">
+                <span className="flex items-center gap-1">
+                  <FileText className="h-4 w-4" />
+                  {articles.length} article{articles.length !== 1 ? 's' : ''}
+                </span>
+                <span className="flex items-center gap-1">
+                  <User className="h-4 w-4" />
+                  {user?.name || 'Docteur'}
+                </span>
+              </div>
             </div>
+            <Button
+              onClick={() => {
+                setIsCreating(!isCreating);
+                setEditing(null);
+              }}
+              className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold px-8 py-3 shadow-lg hover:shadow-xl transition-all duration-200"
+            >
+              <PenSquare className="h-5 w-5 mr-2" />
+              {isCreating ? 'Annuler' : 'New Article'}
+            </Button>
           </div>
+        </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {filteredArticles.map((a) => (
-              <ArticleCard
-                key={a.id}
-                article={a}
-                onEdit={(art) => {
-                  setEditing(art);
-                  setIsCreating(true);
-                }}
-                onDelete={handleDelete}
-              />
-            ))}
-          </div>
+        {isCreating ? (
+          <ArticleForm
+            initialData={editing || undefined}
+            onSubmit={handleSubmit}
+            onCancel={() => {
+              setIsCreating(false);
+              setEditing(null);
+            }}
+          />
+        ) : (
+          <>
+            {/* Search Bar */}
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+              <div className="relative max-w-md">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <input
+                  type="search"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search through your articles..."
+                  className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 transition-all duration-200 text-gray-900 placeholder-gray-500"
+                />
+              </div>
+            </div>
 
-          {filteredArticles.length === 0 && (
-            <p className="text-center text-gray-500 py-12">Aucun article</p>
-          )}
-        </>
-      )}
+            {/* Articles Grid */}
+            {filteredArticles.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+                {filteredArticles.map((article) => (
+                  <ArticleCard
+                    key={article.id}
+                    article={article}
+                    onEdit={(art) => {
+                      setEditing(art);
+                      setIsCreating(true);
+                    }}
+                    onDelete={handleDelete}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-16">
+                <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-12 max-w-md mx-auto">
+                  <FileText className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                    {search ? 'Aucun résultat' : 'Aucun article'}
+                  </h3>
+                  <p className="text-gray-500 mb-6">
+                    {search 
+                      ? `Aucun article ne correspond à "${search}"`
+                      : 'Commencez par créer votre premier article'
+                    }
+                  </p>
+                  {!search && (
+                    <Button
+                      onClick={() => setIsCreating(true)}
+                      className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Create Article
+                    </Button>
+                  )}
+                </div>
+              </div>
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
 }

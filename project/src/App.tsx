@@ -6,18 +6,19 @@ import { Sidebar } from './components/layout/sidebar';
 import { AuthProvider } from '@/contexts/auth-context';
 import { ThemeProvider } from '@/contexts/theme-context';
 import { PatientDashboard } from './components/dashboard/patient-dashboard';
-import { DoctorDashboard } from './components/dashboard/doctor-dashboard';
+import {DoctorDashboard }from './components/dashboard/doctor-dashboard';
 import { AdminDashboard } from './components/dashboard/admin-dashboard';
 import { LoginPage } from './pages/login';
 import { QAForum } from './pages/qa-forum';
-import { ProfilePage } from './pages/profile';
-import { ArticlesPage } from './pages/articles';
+import  ProfilePage  from './pages/profile';
+import { ArticlesPage}  from './pages/articles';
 import { useAuth } from './hooks/use-auth';
 import { Button } from './components/ui/button';
 import { RegisterPage } from './pages/RegisterPage';
-import { Learn } from './pages/learn';
-import { Patients } from './pages/patients';
-import { GestionArticle } from './pages/gererArticles';
+import  Learn from './pages/learn';
+import { Patients} from './pages/patients';
+
+import GestionArticle from './pages/gererArticles';
 import AppointmentsPage from '@/pages/appointments'
 import ManageDoctorAppointments from './pages/doctor-appointments';
 const queryClient = new QueryClient();
@@ -88,6 +89,14 @@ function AppContent() {
                   element={
                     <PrivateRoute>
                       <PatientDashboard />
+                    </PrivateRoute>
+                  }
+                />
+                <Route
+                  path="/Learn"
+                  element={
+                    <PrivateRoute>
+                      <Learn />
                     </PrivateRoute>
                   }
                 />

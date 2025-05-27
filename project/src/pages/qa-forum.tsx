@@ -1,15 +1,16 @@
-import React, { useState , useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import { 
   User as UserIcon, 
   ThumbsUp, 
   MessageSquare, 
   Search as SearchIcon,
-  Clock  // Ajoutez ceci si vous utilisez Clock quelque part
+  Clock
 } from 'lucide-react';
-
 import { Button } from '@/components/ui/button';
-import axios from 'axios'; 
+import axios from 'axios';
+import { cn } from '@/lib/utils';
+
 interface QuestionData {
   id: string;
   title: string;
@@ -19,7 +20,6 @@ interface QuestionData {
   answers: AnswerData[];
 }
 
-// Interface pour les données de réponse
 interface AnswerData {
   id: number;
   body: string;
@@ -37,7 +37,7 @@ interface QuestionFormProps {
   onSubmit: (createdQuestion: any) => void;
   onCancel: () => void;
 }
-// Interface pour l'utilisateur
+
 interface UserData {
   id: string;
   nom: string;
@@ -46,11 +46,14 @@ interface UserData {
   role: string;
 }
 
-interface AnswerData {
-  id: number;
-  body: string;
-  author: UserData;
-  created_at: string;
+interface QuestionCardProps {
+  question: {
+    id: number;
+    title: string;
+    body: string;
+    created_at: string;
+    answers: AnswerData[];
+  };
 }
 
 export function QuestionForm({ onSubmit, onCancel }: QuestionFormProps) {
@@ -84,7 +87,6 @@ export function QuestionForm({ onSubmit, onCancel }: QuestionFormProps) {
         }
       );
 
-      // On appelle bien onSubmit et non onSucces
       onSubmit(response.data);
       setTitle('');
       setBody('');
@@ -100,14 +102,19 @@ export function QuestionForm({ onSubmit, onCancel }: QuestionFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm">
+    <form onSubmit={handleSubmit} className={cn(
+      "space-y-4 p-6 rounded-xl shadow-lg",
+      "bg-gradient-to-br from-white to-slate-50/80 dark:from-slate-800 dark:to-slate-700/90",
+      "border border-slate-200/70 dark:border-slate-600/50",
+      "animate-[fadeIn_0.3s_ease-in-out]"
+    )}>
       {error && (
         <div className="text-red-600">
           {error}
         </div>
       )}
       <div>
-        <label htmlFor="title" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
+        <label htmlFor="title" className="block text-sm font-medium text-slate-700 dark:text-slate-200">
           Titre de la question
         </label>
         <input
@@ -115,14 +122,19 @@ export function QuestionForm({ onSubmit, onCancel }: QuestionFormProps) {
           id="title"
           value={title}
           onChange={e => setTitle(e.target.value)}
-          className="mt-1 block w-full rounded-md border px-3 py-2"
+          className={cn(
+            "mt-1 block w-full rounded-md border px-3 py-2",
+            "border-slate-300 dark:border-slate-600",
+            "bg-white/80 dark:bg-slate-700/90",
+            "focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+          )}
           placeholder="Quel est votre sujet ?"
           required
           disabled={submitting}
         />
       </div>
       <div>
-        <label htmlFor="body" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
+        <label htmlFor="body" className="block text-sm font-medium text-slate-700 dark:text-slate-200">
           Détails
         </label>
         <textarea
@@ -130,23 +142,39 @@ export function QuestionForm({ onSubmit, onCancel }: QuestionFormProps) {
           value={body}
           onChange={e => setBody(e.target.value)}
           rows={4}
-          className="mt-1 block w-full rounded-md border px-3 py-2"
+          className={cn(
+            "mt-1 block w-full rounded-md border px-3 py-2",
+            "border-slate-300 dark:border-slate-600",
+            "bg-white/80 dark:bg-slate-700/90",
+            "focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+          )}
           placeholder="Expliquez votre question en détail..."
           required
           disabled={submitting}
         />
       </div>
       <div className="flex justify-end gap-3">
-        <Button type="button" variant="outline" onClick={onCancel} disabled={submitting}>
+        <Button 
+          type="button" 
+          variant="outline" 
+          onClick={onCancel} 
+          disabled={submitting}
+          className="border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700"
+        >
           Annuler
         </Button>
-        <Button type="submit" disabled={submitting}>
+        <Button 
+          type="submit" 
+          disabled={submitting}
+          className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white shadow-lg shadow-emerald-500/30"
+        >
           {submitting ? 'Publication…' : 'Poser la question'}
         </Button>
       </div>
     </form>
   );
 }
+
 export function AnswerForm({
   questionId,
   onSubmit,
@@ -181,7 +209,6 @@ export function AnswerForm({
         }
       );
 
-      // Ne garder que les champs attendus par QuestionCard
       const {
         id,
         body: newBody,
@@ -200,7 +227,7 @@ export function AnswerForm({
       console.error(err);
       setError(
         err.response?.data?.detail ||
-        'Une erreur est survenue lors de l’envoi de la réponse.'
+        'Une erreur est survenue lors de  l envoi de la réponse.'
       );
     } finally {
       setSubmitting(false);
@@ -208,13 +235,18 @@ export function AnswerForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className={cn(
+      "space-y-4 p-4 rounded-xl",
+      "bg-gradient-to-br from-white to-slate-50/80 dark:from-slate-800/90 dark:to-slate-700/80",
+      "border border-slate-200/70 dark:border-slate-600/50",
+      "animate-[fadeIn_0.3s_ease-in-out]"
+    )}>
       {error && <div className="text-red-600">{error}</div>}
 
       <div>
         <label
           htmlFor="answer"
-          className="block text-sm font-medium text-gray-700 dark:text-gray-200"
+          className="block text-sm font-medium text-slate-700 dark:text-slate-200"
         >
           Votre réponse
         </label>
@@ -223,7 +255,12 @@ export function AnswerForm({
           value={body}
           onChange={e => setBody(e.target.value)}
           rows={4}
-          className="mt-1 block w-full rounded-md border px-3 py-2"
+          className={cn(
+            "mt-1 block w-full rounded-md border px-3 py-2",
+            "border-slate-300 dark:border-slate-600",
+            "bg-white/80 dark:bg-slate-700/90",
+            "focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+          )}
           placeholder="Partagez vos connaissances..."
           required
           disabled={submitting}
@@ -236,31 +273,27 @@ export function AnswerForm({
           variant="outline"
           onClick={onCancel}
           disabled={submitting}
+          className="border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700"
         >
           Annuler
         </Button>
-        <Button type="submit" disabled={submitting}>
+        <Button 
+          type="submit" 
+          disabled={submitting}
+          className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white shadow-lg shadow-emerald-500/30"
+        >
           {submitting ? 'Envoi…' : 'Poster la réponse'}
         </Button>
       </div>
     </form>
   );
 }
-interface QuestionCardProps {
-  question: {
-    id: number;
-    title: string;
-    body: string;
-    created_at: string;
-    answers: AnswerData[];
-  };
-}
+
 export function QuestionCard({ question }: QuestionCardProps) {
   const [isAnswering, setIsAnswering] = useState(false);
   const [showAllAnswers, setShowAllAnswers] = useState(false);
   const [answers, setAnswers] = useState<AnswerData[]>(question.answers);
 
-  // Debug des données reçues
   useEffect(() => {
     console.log('Données de la question:', {
       id: question.id,
@@ -269,7 +302,6 @@ export function QuestionCard({ question }: QuestionCardProps) {
       created_at: question.created_at,
       answers: question.answers.map(a => ({
         id: a.id,
-       
         preview: a.body.substring(0, 20) + (a.body.length > 20 ? '...' : '')
       }))
     });
@@ -278,11 +310,9 @@ export function QuestionCard({ question }: QuestionCardProps) {
   const handleAnswerSubmit = (newAnswer: AnswerData) => {
     console.log('Ajout réponse:', {
       id: newAnswer.id,
-      
       length: newAnswer.body.length
     });
 
-    // Validation de la réponse
     if (!newAnswer.author) {
       console.error('Réponse sans auteur valide', newAnswer);
       return;
@@ -306,12 +336,19 @@ export function QuestionCard({ question }: QuestionCardProps) {
     }
 
     return (
-      <div key={answer.id} className="pl-4 border-l-2 border-primary-200 dark:border-gray-600 space-y-2">
-        <p className="text-gray-700 dark:text-gray-300">{answer.body}</p>
-        <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-          <UserIcon className="h-4 w-4 flex-shrink-0" />
+      <div 
+        key={answer.id} 
+        className={cn(
+          "pl-4 border-l-2 space-y-2",
+          "border-gradient-to-b from-emerald-400 to-teal-400",
+          "animate-[fadeIn_0.3s_ease-in-out]"
+        )}
+      >
+        <p className="text-slate-700 dark:text-slate-200">{answer.body}</p>
+        <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+          <UserIcon className="h-4 w-4 flex-shrink-0 text-emerald-600 dark:text-emerald-400" />
           <span className="font-medium" data-testid={`answer-author-${answer.id}`}>
-          {answer.author.prenom} {answer.author.nom}
+            {answer.author.prenom} {answer.author.nom}
           </span>
           <span>• {new Date(answer.created_at).toLocaleDateString()}</span>
         </div>
@@ -320,28 +357,33 @@ export function QuestionCard({ question }: QuestionCardProps) {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 space-y-4 mb-4">
+    <div className={cn(
+      "rounded-xl p-6 space-y-4 mb-4 shadow-lg",
+      "bg-gradient-to-br from-white to-slate-50/80 dark:from-slate-800 dark:to-slate-700/90",
+      "border border-slate-200/70 dark:border-slate-600/50",
+      "hover:shadow-xl hover:shadow-emerald-100/30 dark:hover:shadow-emerald-900/20",
+      "transition-all duration-300 animate-[fadeIn_0.5s_ease-in-out]"
+    )}>
       {/* En-tête */}
       <div className="space-y-2">
-        <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">
+        <h3 className="text-lg font-medium text-slate-800 dark:text-slate-100">
           {question.title}
         </h3>
-        <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-          <UserIcon className="h-4 w-4" />
-        
+        <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+          <UserIcon className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
           <span>• {new Date(question.created_at).toLocaleDateString()}</span>
         </div>
       </div>
 
       {/* Contenu */}
-      <p className="text-gray-700 dark:text-gray-300">{question.body}</p>
+      <p className="text-slate-700 dark:text-slate-200">{question.body}</p>
 
       {/* Réponses */}
       <div className="space-y-4">
         {displayedAnswers.length > 0 ? (
           displayedAnswers.map(renderAnswer)
         ) : (
-          <p className="text-sm text-gray-400 italic">Aucune réponse pour le moment</p>
+          <p className="text-sm text-slate-400 italic">Aucune réponse pour le moment</p>
         )}
 
         {answers.length > 1 && (
@@ -349,7 +391,7 @@ export function QuestionCard({ question }: QuestionCardProps) {
             variant="ghost"
             size="sm"
             onClick={() => setShowAllAnswers(!showAllAnswers)}
-            className="text-primary-600 hover:text-primary-800 dark:text-primary-400 dark:hover:text-primary-300"
+            className="text-emerald-600 hover:text-emerald-800 dark:text-emerald-400 dark:hover:text-emerald-300"
           >
             {showAllAnswers
               ? 'Réduire les réponses'
@@ -371,9 +413,9 @@ export function QuestionCard({ question }: QuestionCardProps) {
             variant="outline"
             size="sm"
             onClick={() => setIsAnswering(true)}
-            className="mt-2"
+            className="mt-2 border-emerald-500 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-slate-700"
           >
-            <MessageSquare className="h-4 w-4 mr-2" />
+            <MessageSquare className="h-4 w-4 mr-2 text-emerald-600 dark:text-emerald-400" />
             {answers.length > 0 ? 'Ajouter une réponse' : 'Répondre'}
           </Button>
         )}
@@ -381,12 +423,12 @@ export function QuestionCard({ question }: QuestionCardProps) {
     </div>
   );
 }
+
 export function QAForum() {
   const { user } = useAuth();
   const [questions, setQuestions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
   const [isAskingQuestion, setIsAskingQuestion] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState<'all'|'unanswered'|'answered'>('all');
@@ -405,7 +447,6 @@ export function QAForum() {
         { headers: { 'Authorization': `Token ${token}` }, withCredentials: true }
       );
   
-      // On retire les doublons sur titre + body
       const unique = res.data.filter(
         (q: any, idx: number, arr: any[]) => 
           idx === arr.findIndex(el => el.title === q.title && el.body === q.body)
@@ -419,15 +460,12 @@ export function QAForum() {
       setLoading(false);
     }
   };
-  
 
   const handleNewQuestion = (createdQuestion: QuestionData) => {
-    // on a déjà créé la question côté QuestionForm
     setQuestions(prev => [createdQuestion, ...prev]);
     setIsAskingQuestion(false);
   };
 
-  // Filtrage et recherche
   const filteredQuestions = questions.filter(q => {
     const matchesSearch =
       q.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -444,51 +482,70 @@ export function QAForum() {
 
   if (loading) {
     return (
-      <div className="text-center py-6">
+      <div className="text-center py-6 text-slate-600 dark:text-slate-400">
         Chargement des questions…
       </div>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto py-6 space-y-6">
+    <div className="max-w-4xl mx-auto py-6 space-y-6 px-4">
       {error && (
         <div className="text-red-600">
           {error}
         </div>
       )}
 
-      {/* En-tête + bouton poser une question */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+      {/* En-tête avec nouveau style */}
+      <div className={cn(
+        "flex items-center justify-between p-4 rounded-xl",
+        "bg-gradient-to-r from-emerald-50/50 to-teal-50/50 dark:from-slate-800/80 dark:to-slate-700/80",
+        "border border-emerald-100/50 dark:border-slate-600/50",
+        "shadow-lg shadow-emerald-100/20 dark:shadow-emerald-900/10"
+      )}>
+        <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">
           Forum de Questions/Réponses
         </h1>
-        <Button onClick={() => setIsAskingQuestion(true)}>
+        <Button 
+          onClick={() => setIsAskingQuestion(true)}
+          className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white shadow-lg shadow-emerald-500/30"
+        >
           <MessageSquare className="h-5 w-5 mr-2" />
           Poser une question
         </Button>
       </div>
 
-      {/* Recherche et filtres */}
-      <div className="flex items-center gap-4 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm">
+      {/* Barre de recherche avec nouveau style */}
+      <div className={cn(
+        "flex items-center gap-4 p-4 rounded-xl",
+        "bg-gradient-to-br from-white to-slate-50/80 dark:from-slate-800 dark:to-slate-700/90",
+        "border border-slate-200/70 dark:border-slate-600/50",
+        "shadow-lg shadow-slate-100/20 dark:shadow-slate-900/10"
+      )}>
         <div className="flex-1 relative">
-          <SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+          <SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
           <input
             type="search"
             placeholder="Rechercher..."
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 rounded-md border border-gray-300 dark:border-gray-600
-              focus:border-primary-500 focus:ring-primary-500
-              dark:bg-gray-700 dark:text-gray-100"
+            className={cn(
+              "w-full pl-10 pr-4 py-2 rounded-md",
+              "border border-slate-300 dark:border-slate-600",
+              "focus:border-emerald-500 focus:ring-emerald-500",
+              "bg-white/80 dark:bg-slate-700/90 dark:text-slate-100"
+            )}
           />
         </div>
         <select
           value={selectedFilter}
           onChange={e => setSelectedFilter(e.target.value as any)}
-          className="rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2
-            focus:border-primary-500 focus:ring-primary-500
-            dark:bg-gray-700 dark:text-gray-100"
+          className={cn(
+            "rounded-md px-3 py-2",
+            "border border-slate-300 dark:border-slate-600",
+            "focus:border-emerald-500 focus:ring-emerald-500",
+            "bg-white/80 dark:bg-slate-700/90 dark:text-slate-100"
+          )}
         >
           <option value="all">Toutes</option>
           <option value="unanswered">Sans réponse</option>
@@ -508,7 +565,7 @@ export function QAForum() {
             <QuestionCard key={question.id} question={question} />
           ))}
           {filteredQuestions.length === 0 && (
-            <p className="text-center text-gray-500">
+            <p className="text-center text-slate-500">
               Aucune question trouvée.
             </p>
           )}
