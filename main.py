@@ -15,7 +15,7 @@ from chromadb.utils import embedding_functions
 from huggingface_hub import login
 from fastapi.middleware.cors import CORSMiddleware
 # Authentification HF (adapte le token !)
-os.environ['HF_TOKEN'] = ""
+os.environ['HF_TOKEN'] = "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"
 login(token=os.environ['HF_TOKEN'])
 
 # -------- CONFIG LOG --------
