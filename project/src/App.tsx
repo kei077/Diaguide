@@ -150,6 +150,14 @@ function AppContent() {
                   }
                 />
                 <Route
+                 path="/learn"
+                 element={
+                     <PrivateRoute>
+                       <Learn />
+                     </PrivateRoute>
+                   }
+                 />
+                <Route
                   path="/patients"
                   element={
                     <PrivateRoute>
