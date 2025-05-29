@@ -22,12 +22,17 @@ interface Record<T> {
   notes?: string;
   [key: string]: any;
 }
-
+interface TensionRecord {
+  id: number;
+  systolique: number;
+  diastolique: number;
+  date_heure: string;
+}
 interface PatientHealth {
   id: number;
   nom: string;
   prenom: string;
-  diabetes_type: string;
+  type_diabete: string;
   health_metrics: {
     glucose_records: Record<number>[];
     insulin_records: Record<number>[];
@@ -36,6 +41,7 @@ interface PatientHealth {
     activity_records: any[];
     medication_records: any[];
     bmi: number | null;
+    tension_records: TensionRecord[]; 
   };
   is_assigned: boolean;
 }
@@ -62,6 +68,7 @@ export function DoctorDashboard() {
           params: { email: user.email },
           headers: { Authorization: `Token ${token}` },
         });
+        console.log('Fetched patients:',response.data);
 
         setPatients(response.data);
       } catch (err) {
@@ -93,7 +100,7 @@ export function DoctorDashboard() {
     const recentGlucose = health_metrics.glucose_records.slice(0, 7);
     const recentWeight = health_metrics.weight_records.slice(0, 7);
     const recentInsulin = health_metrics.insulin_records.slice(0, 7);
-    
+    const recentTensions = patient.health_metrics.tension_records.slice(0, 7);
     const currentDate = new Date().toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
@@ -466,7 +473,7 @@ export function DoctorDashboard() {
             <div class="patient-info">
               <h2>Patient Information</h2>
               <p><strong>Name:</strong> ${patient.nom} ${patient.prenom}</p>
-              <p><strong>Diabetes type:</strong> ${getDiabetesTypeLabel(patient.diabetes_type)}</p>
+              <p><strong>Diabetes type:</strong> ${getDiabetesTypeLabel(patient.type_diabete)}</p>
               <p><strong>BMI:</strong> ${patient.health_metrics.bmi || 'Not available'}</p>
             </div>
             
@@ -544,6 +551,23 @@ export function DoctorDashboard() {
                 </tbody>
               </table>
             </div>
+            <div class="section">
+  <h3>🩺 Blood Pressure (Last 7 measurements)</h3>
+  <table>
+    <thead>
+      <tr><th>Date</th><th>Systolic</th><th>Diastolic</th></tr>
+    </thead>
+    <tbody>
+      ${recentTensions.map(record => `
+        <tr>
+          <td>${formatDate(record.date_heure)}</td>
+          <td>${record.systolique ?? '—'}</td>
+          <td>${record.diastolique ?? '—'}</td>
+        </tr>
+      `).join('')}
+    </tbody>
+  </table>
+</div>
             
             <div class="section">
               <h3>📝 Clinical Observations</h3>
@@ -725,7 +749,7 @@ export function DoctorDashboard() {
             },
             {
               title: "Type 1 Diabetes",
-              value: patients.filter(p => p.diabetes_type === 'type1').length,
+              value: patients.filter(p => p.type_diabete === 'type1').length,
               icon: Droplets,
               gradient: "from-purple-500 to-pink-500",
               bgGradient: "from-purple-50 to-pink-50",
@@ -735,7 +759,7 @@ export function DoctorDashboard() {
             },
             {
               title: "Type 2 Diabetes",
-              value: patients.filter(p => p.diabetes_type === 'type2').length,
+              value: patients.filter(p => p.type_diabete === 'type2').length,
               icon: Scale,
               gradient: "from-orange-500 to-red-500",
               bgGradient: "from-orange-50 to-red-50",
@@ -745,7 +769,7 @@ export function DoctorDashboard() {
             },
             {
               title: "Gestational",
-              value: patients.filter(p => p.diabetes_type === 'gestationnel').length,
+              value: patients.filter(p => p.type_diabete === 'gestationnel').length,
               icon: HeartPulse,
               gradient: "from-pink-500 to-rose-500",
               bgGradient: "from-pink-50 to-rose-50",
@@ -817,6 +841,7 @@ export function DoctorDashboard() {
                     'Glucose',
                     'Weight',
                     'Insulin',
+                    'Tension',
                     'BMI',
                     'Actions'
                   ].map((header, index) => (
@@ -835,6 +860,7 @@ export function DoctorDashboard() {
                   const latestGlucose = patient.health_metrics.glucose_records[0]?.value ?? '—';
                   const latestWeight = patient.health_metrics.weight_records[0]?.value ?? '—';
                   const latestInsulin = patient.health_metrics.insulin_records[0]?.dose ?? '—';
+                  const latestTension = patient.health_metrics.tension_records?.[0];
                   const bmi = patient.health_metrics.bmi ?? '—';
 
                   return (
@@ -852,20 +878,16 @@ export function DoctorDashboard() {
                             <div className="text-sm font-bold text-gray-900">
                               {patient.nom} {patient.prenom}
                             </div>
-                            <div className="text-xs text-gray-500 flex items-center gap-1">
-                              <span>ID: {patient.id}</span>
-                              <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
-                              <span>Active</span>
-                            </div>
+                           
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-6">
                         <span className={`px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-full shadow-sm
-                          ${patient.diabetes_type === 'type1' ? 'bg-gradient-to-r from-purple-100 to-purple-200 text-purple-800 border border-purple-200' : 
-                            patient.diabetes_type === 'type2' ? 'bg-gradient-to-r from-orange-100 to-orange-200 text-orange-800 border border-orange-200' : 
+                          ${patient.type_diabete === 'type1' ? 'bg-gradient-to-r from-purple-100 to-purple-200 text-purple-800 border border-purple-200' : 
+                            patient.type_diabete === 'type2' ? 'bg-gradient-to-r from-orange-100 to-orange-200 text-orange-800 border border-orange-200' : 
                             'bg-gradient-to-r from-pink-100 to-pink-200 text-pink-800 border border-pink-200'}`}>
-                          {getDiabetesTypeLabel(patient.diabetes_type)}
+                          {getDiabetesTypeLabel(patient.type_diabete)}
                         </span>
                       </td>
                       <td className="px-6 py-6">
@@ -889,6 +911,16 @@ export function DoctorDashboard() {
                           {latestInsulin} {latestInsulin !== '—' && 'IU'}
                         </div>
                       </td>
+                      <td className="px-6 py-6">
+                  {latestTension ? (
+                <span className="text-sm font-medium text-gray-900">
+                {latestTension.systolique}/{latestTension.diastolique} mmHg
+                
+                </span>
+                 ) : (
+                <span className="text-gray-400">—</span>
+                  )}
+                    </td>
                       <td className="px-6 py-6">
                         {typeof bmi === 'number' ? (
                           <span className={`px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-full shadow-sm

@@ -19,6 +19,7 @@ import {
   Bell,
   FileText,
   BarChart,
+  Bot
 } from "lucide-react"
 
 // Memoized NavItem component with green color scheme
@@ -182,6 +183,7 @@ export function Sidebar() {
         { href: "/learn", icon: Brain, label: "Learn About Diabetes" },
         { href: "/qa", icon: MessageSquare, label: "Q&A Forum" },
         { href: "/appointments", icon: BookOpen, label: "Appointments" },
+         { href: "/diabot", icon: Bot, label: "DiaBot AI" },
       ],
       doctor: [
         { href: "/profile", icon: User, label: "Profile" },
@@ -190,6 +192,7 @@ export function Sidebar() {
         { href: "/qa", icon: MessageSquare, label: "Q&A Forum" },
         { href: "/learn", icon: Brain, label: "Knowledge Base" },
         { href: "/doctor-appointments", icon: BookOpen, label: "Appointments" },
+         { href: "/diabot", icon: Bot, label: "DiaBot AI" },
       ],
       admin: [
         { href: "/profile", icon: User, label: "Profile" },
