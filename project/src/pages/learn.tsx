@@ -328,16 +328,7 @@ export default function Learn() {
         )}
       </div>
 
-      {/* Enhanced Chatbot */}
-      <button
-        onClick={() => setIsChatOpen(true)}
-        className={`fixed bottom-8 right-8 bg-gradient-to-r from-green-600 to-emerald-600 text-white p-4 rounded-full shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-110 ${
-          isChatOpen ? "hidden" : ""
-        }`}
-      >
-        <MessageCircle className="h-7 w-7" />
-        <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full animate-pulse"></div>
-      </button>
+      
 
       {isChatOpen && (
         <div className="fixed bottom-8 right-8 w-96 bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden animate-in slide-in-from-bottom-4 duration-300">

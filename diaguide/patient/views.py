@@ -382,6 +382,7 @@ class DoctorPatientHealthView(APIView):
             meal_qs     = Repas.objects.filter(patient=patient).order_by('-date_repas')
             activity_qs = ActiviteSportive.objects.filter(patient=patient).order_by('-date_heure')
             meds_qs     = Medication.objects.filter(patient=patient)
+            tension_qs  = TensionArterielle.objects.filter(patient=patient).order_by('-date_heure')
 
             # 5) Calcul du BMI si possible
             bmi = None
@@ -392,7 +393,14 @@ class DoctorPatientHealthView(APIView):
                     bmi = round(w_kg / (h_m * h_m), 1)
                 except (TypeError, ValueError):
                     pass
-
+            tensions_data = [
+                {
+                    'id': t.id,
+                    'systolique': t.systolique,
+                    'diastolique': t.diastolique,
+                    'date_heure': t.date_heure,
+                } for t in tension_qs
+            ] 
             # 6) Construire le dictionnaire de réponse
             data.append({
                 'id': patient.id,
@@ -416,6 +424,7 @@ class DoctorPatientHealthView(APIView):
                             'notes': getattr(i, 'notes', None)
                         } for i in insulin_qs
                     ],
+                    'tension_records': tensions_data,
                     'weight_records': [
                         {
                             'id': w.id,
