@@ -95,45 +95,45 @@ export function RegisterPage() {
   }
 
   const getPasswordStrengthText = () => {
-    if (passwordStrength <= 1) return "Faible"
-    if (passwordStrength <= 3) return "Moyen"
-    return "Fort"
+    if (passwordStrength <= 1) return "Weak"
+    if (passwordStrength <= 3) return "Medium"
+    return "Strong"
   }
 
   const validateStep = (stepNumber: number) => {
     const newErrors: FormErrors = {}
     if (stepNumber === 1) {
-      if (!formData.firstName) newErrors.firstName = "Le prénom est requis"
-      if (!formData.lastName) newErrors.lastName = "Le nom est requis"
+      if (!formData.firstName) newErrors.firstName = "First name is required"
+      if (!formData.lastName) newErrors.lastName = "Last name is required"
       if (!formData.email) {
-        newErrors.email = "L'email est requis"
+        newErrors.email = "Email is required"
       } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-        newErrors.email = "Email invalide"
+        newErrors.email = "Invalid email format"
       }
-      if (!formData.phone) newErrors.phone = "Le téléphone est requis"
+      if (!formData.phone) newErrors.phone = "Phone number is required"
     }
     if (stepNumber === 2) {
       if (formData.userType === "patient") {
-        if (!formData.birthDate) newErrors.birthDate = "La date de naissance est requise"
-        if (!formData.gender) newErrors.gender = "Le genre est requis"
-        if (!formData.weight) newErrors.weight = "Le poids est requis"
-        if (!formData.height) newErrors.height = "La taille est requise"
+        if (!formData.birthDate) newErrors.birthDate = "Date of birth is required"
+        if (!formData.gender) newErrors.gender = "Gender is required"
+        if (!formData.weight) newErrors.weight = "Weight is required"
+        if (!formData.height) newErrors.height = "Height  is required"
       } else if (formData.userType === "doctor") {
-        if (!formData.specialty) newErrors.specialty = "La spécialité est requise"
-        if (!formData.consultationPrice) newErrors.consultationPrice = "Le prix de consultation est requis"
-        if (!formData.address) newErrors.address = "L'adresse est requise"
-        if (!formData.city) newErrors.city = "La ville est requise"
-        if (!formData.INPE) newErrors.INPE = "Le INPE est requis"
+        if (!formData.specialty) newErrors.specialty = "Specialty is required"
+        if (!formData.consultationPrice) newErrors.consultationPrice = "Consultation price is required"
+        if (!formData.address) newErrors.address = "Address is required"
+        if (!formData.city) newErrors.city = "City is required"
+        if (!formData.INPE) newErrors.INPE = "INPE is required"
       }
     }
     if (stepNumber === 3) {
       if (!formData.password) {
-        newErrors.password = "Le mot de passe est requis"
+        newErrors.password = "Password is required"
       } else if (formData.password.length < 6) {
-        newErrors.password = "Le mot de passe doit contenir au moins 6 caractères"
+        newErrors.password = "Password must be at least 6 characters long"
       }
       if (formData.password !== formData.confirmPassword) {
-        newErrors.confirmPassword = "Les mots de passe ne correspondent pas"
+        newErrors.confirmPassword = "Passwords do not match"
       }
     }
     setErrors(newErrors)
@@ -234,7 +234,7 @@ export function RegisterPage() {
           <div className="flex justify-center">
             <Activity className="h-12 w-12 text-white" />
           </div>
-          <h2 className="text-center text-2xl font-bold text-white">Créer un compte</h2>
+          <h2 className="text-center text-2xl font-bold text-white">Create an account</h2>
           <div className="mt-4 px-6">
             <div className="relative">
               <div className="overflow-hidden h-2 text-xs flex rounded bg-green-200">
@@ -245,9 +245,10 @@ export function RegisterPage() {
                 />
               </div>
               <div className="flex justify-between mt-1">
-                <div className={`text-xs font-semibold ${step >= 1 ? "text-white" : "text-green-200"}`}>Profil</div>
-                <div className={`text-xs font-semibold ${step >= 2 ? "text-white" : "text-green-200"}`}>Détails</div>
-                <div className={`text-xs font-semibold ${step >= 3 ? "text-white" : "text-green-200"}`}>Sécurité</div>
+              <div className={`text-xs font-semibold ${step >= 1 ? "text-white" : "text-green-200"}`}>Profile</div>
+              <div className={`text-xs font-semibold ${step >= 2 ? "text-white" : "text-green-200"}`}>Details</div>
+              <div className={`text-xs font-semibold ${step >= 3 ? "text-white" : "text-green-200"}`}>Security</div>
+
               </div>
             </div>
           </div>
@@ -276,7 +277,7 @@ export function RegisterPage() {
                     : "text-gray-700 hover:bg-green-50"
                 }`}
               >
-                Médecin
+                Doctor
               </button>
             </div>
           </div>
@@ -290,10 +291,10 @@ export function RegisterPage() {
               transition={{ duration: 0.3 }}
               className="space-y-4"
             >
-              <h3 className="text-lg font-medium text-gray-800 border-b pb-2">Informations de base</h3>
+              <h3 className="text-lg font-medium text-gray-800 border-b pb-2">Basic Information</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="col-span-1">
-                  <label className="block text-sm font-medium text-gray-700">Prénom</label>
+                  <label className="block text-sm font-medium text-gray-700">First name</label>
                   <motion.input
                     whileFocus={{ scale: 1.01 }}
                     transition={{ duration: 0.2 }}
@@ -308,7 +309,7 @@ export function RegisterPage() {
                   {errors.firstName && <p className="mt-1 text-sm text-red-600">{errors.firstName}</p>}
                 </div>
                 <div className="col-span-1">
-                  <label className="block text-sm font-medium text-gray-700">Nom</label>
+                  <label className="block text-sm font-medium text-gray-700">Last name</label>
                   <motion.input
                     whileFocus={{ scale: 1.01 }}
                     transition={{ duration: 0.2 }}
@@ -339,7 +340,7 @@ export function RegisterPage() {
                 {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Téléphone</label>
+                <label className="block text-sm font-medium text-gray-700">Phone number</label>
                 <div className="mt-1 relative rounded-md shadow-sm">
                   <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                     <span className="text-gray-500 sm:text-sm">+212</span>
@@ -371,13 +372,13 @@ export function RegisterPage() {
               className="space-y-4"
             >
               <h3 className="text-lg font-medium text-gray-800 border-b pb-2">
-                {formData.userType === "patient" ? "Informations personnelles" : "Informations professionnelles"}
+                {formData.userType === "patient" ? "Personal Information" : "Professional Information"}
               </h3>
               {formData.userType === "patient" ? (
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="col-span-1">
-                      <label className="block text-sm font-medium text-gray-700">Date de naissance</label>
+                      <label className="block text-sm font-medium text-gray-700">Date of birth</label>
                       <motion.input
                         whileFocus={{ scale: 1.01 }}
                         transition={{ duration: 0.2 }}
@@ -392,7 +393,7 @@ export function RegisterPage() {
                       {errors.birthDate && <p className="mt-1 text-sm text-red-600">{errors.birthDate}</p>}
                     </div>
                     <div className="col-span-1">
-                      <label className="block text-sm font-medium text-gray-700">Genre</label>
+                      <label className="block text-sm font-medium text-gray-700">Gender</label>
                       <select
                         name="gender"
                         value={formData.gender}
@@ -401,16 +402,16 @@ export function RegisterPage() {
                           errors.gender ? "border-red-500" : ""
                         }`}
                       >
-                        <option value="">Sélectionner</option>
-                        <option value="Male">Masculin</option>
-                        <option value="Female">Féminin</option>
+                        <option value="">Select</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
                       </select>
                       {errors.gender && <p className="mt-1 text-sm text-red-600">{errors.gender}</p>}
                     </div>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="col-span-1">
-                      <label className="block text-sm font-medium text-gray-700">Poids (kg)</label>
+                      <label className="block text-sm font-medium text-gray-700">Weight (kg)</label>
                       <div className="mt-1 relative rounded-md shadow-sm">
                         <motion.input
                           whileFocus={{ scale: 1.01 }}
@@ -427,7 +428,7 @@ export function RegisterPage() {
                       </div>
                     </div>
                     <div className="col-span-1">
-                      <label className="block text-sm font-medium text-gray-700">Taille (cm)</label>
+                      <label className="block text-sm font-medium text-gray-700">Height (cm)</label>
                       <div className="mt-1 relative rounded-md shadow-sm">
                         <motion.input
                           whileFocus={{ scale: 1.01 }}
@@ -458,12 +459,12 @@ export function RegisterPage() {
                       value={formData.INPE}
                       onChange={handleChange}
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 transition-colors duration-200"
-                      placeholder="Ex: HAMZA123"
+                      
                     />
                     {errors.INPE && <p className="mt-1 text-sm text-red-600">{errors.INPE}</p>}
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Spécialité</label>
+                    <label className="block text-sm font-medium text-gray-700">Specialty</label>
                     <motion.input
                       whileFocus={{ scale: 1.01 }}
                       transition={{ duration: 0.2 }}
@@ -478,7 +479,7 @@ export function RegisterPage() {
                     {errors.specialty && <p className="mt-1 text-sm text-red-600">{errors.specialty}</p>}
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Prix de consultation (MAD)</label>
+                    <label className="block text-sm font-medium text-gray-700">Consultation Price (MAD)</label>
                     <div className="mt-1 relative rounded-md shadow-sm">
                       <motion.input
                         whileFocus={{ scale: 1.01 }}
@@ -500,7 +501,7 @@ export function RegisterPage() {
                     )}
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Langues parlées</label>
+                    <label className="block text-sm font-medium text-gray-700">Spoken Languages</label>
                     <motion.input
                       whileFocus={{ scale: 1.01 }}
                       transition={{ duration: 0.2 }}
@@ -513,7 +514,7 @@ export function RegisterPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Ville</label>
+                    <label className="block text-sm font-medium text-gray-700">City</label>
                     <select
                       name="city"
                       value={formData.city}
@@ -522,7 +523,7 @@ export function RegisterPage() {
                         errors.city ? "border-red-500" : ""
                       }`}
                     >
-                      <option value="">Sélectionner</option>
+                      <option value="">Select</option>
                       <option value="casablanca">Casablanca</option>
                       <option value="rabat">Rabat</option>
                       <option value="marrakech">Marrakech</option>
@@ -532,7 +533,36 @@ export function RegisterPage() {
                       <option value="meknes">Meknès</option>
                       <option value="oujda">Oujda</option>
                       <option value="tetouan">Tétouan</option>
-                      <option value="other">Autre</option>
+                      <option value="kenitra">Kénitra</option>
+                      <option value="safi">Safi</option>
+                      <option value="el-jadida">El Jadida</option>
+                      <option value="beni-mellal">Béni Mellal</option>
+                      <option value="taza">Taza</option>
+                      <option value="errachidia">Errachidia</option>
+                      <option value="nador">Nador</option>
+                      <option value="berkane">Berkane</option>
+                      <option value="khemisset">Khémisset</option>
+                      <option value="tiznit">Tiznit</option>
+                      <option value="larache">Larache</option>
+                      <option value="khenifra">Khénifra</option>
+                      <option value="taourirt">Taourirt</option>
+                      <option value="guelmim">Guelmim</option>
+                      <option value="dakhla">Dakhla</option>
+                      <option value="laayoune">Laâyoune</option>
+                      <option value="mohammedia">Mohammedia</option>
+                      <option value="settat">Settat</option>
+                      <option value="khouribga">Khouribga</option>
+                      <option value="azrou">Azrou</option>
+                      <option value="azilal">Azilal</option>
+                      <option value="ouarzazate">Ouarzazate</option>
+                      <option value="al-hoceima">Al Hoceïma</option>
+                      <option value="midelt">Midelt</option>
+                      <option value="sidi-kacem">Sidi Kacem</option>
+                      <option value="sidi-slimane">Sidi Slimane</option>
+                      <option value="tan-tan">Tan-Tan</option>
+                      <option value="tinghir">Tinghir</option>
+                      <option value="zagora">Zagora</option>
+                      <option value="other">Other</option>
                     </select>
                     {errors.city && <p className="mt-1 text-sm text-red-600">{errors.city}</p>}
                   </div>
@@ -565,9 +595,9 @@ export function RegisterPage() {
               transition={{ duration: 0.3 }}
               className="space-y-4"
             >
-              <h3 className="text-lg font-medium text-gray-800 border-b pb-2">Sécurité du compte</h3>
+              <h3 className="text-lg font-medium text-gray-800 border-b pb-2">Account Security</h3>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Mot de passe</label>
+                <label className="block text-sm font-medium text-gray-700">Password</label>
                 <div className="mt-1 relative rounded-md shadow-sm">
                   <motion.input
                     whileFocus={{ scale: 1.01 }}
@@ -639,7 +669,7 @@ export function RegisterPage() {
                 )}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Confirmer le mot de passe</label>
+                <label className="block text-sm font-medium text-gray-700">Confirm Password</label>
                 <div className="mt-1 relative rounded-md shadow-sm">
                   <motion.input
                     whileFocus={{ scale: 1.01 }}
@@ -692,7 +722,7 @@ export function RegisterPage() {
                 onClick={handlePrevStep}
                 className="px-4 py-2 text-sm text-gray-600 bg-gray-200 hover:bg-gray-300 rounded-md transition-colors duration-200"
               >
-                Précédent
+                Previous
               </button>
             )}
             {step < 3 ? (
@@ -701,7 +731,7 @@ export function RegisterPage() {
                 onClick={handleNextStep}
                 className="ml-auto px-4 py-2 text-sm text-white bg-green-600 hover:bg-green-700 rounded-md transition-colors duration-200 shadow-md hover:shadow-lg"
               >
-                Suivant
+                Next
               </button>
             ) : (
               <button
@@ -709,18 +739,18 @@ export function RegisterPage() {
                 disabled={isSubmitting}
                 className="ml-auto px-4 py-2 text-sm text-white bg-green-600 hover:bg-green-700 rounded-md disabled:opacity-50 transition-colors duration-200 shadow-md hover:shadow-lg"
               >
-                {isSubmitting ? "Inscription en cours..." : "S'inscrire"}
+                {isSubmitting ? "Signing up..." : "Sign Up"}
               </button>
             )}
           </div>
           <div className="text-center mt-4">
             <p className="text-sm text-gray-600">
-              Vous avez déjà un compte ?{" "}
+              Already have an account? {" "}
               <a
                 href="/login"
                 className="font-medium text-green-600 hover:text-green-500 transition-colors duration-200"
               >
-                Se connecter
+                Sign in
               </a>
             </p>
           </div>
