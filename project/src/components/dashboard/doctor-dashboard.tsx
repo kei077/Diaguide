@@ -952,19 +952,7 @@ export function DoctorDashboard() {
         </div>
 
         {/* Alert Section */}
-        <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-3xl p-6 shadow-lg">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-amber-100 rounded-2xl">
-              <AlertCircle className="h-6 w-6 text-amber-600" />
-            </div>
-            <div>
-              <h3 className="font-bold text-amber-800 mb-1">Monitoring Alert</h3>
-              <p className="text-amber-700 text-sm">
-                2 patients require attention for glucose levels outside normal range. Review recommended.
-              </p>
-            </div>
-          </div>
-        </div>
+        
       </div>
     </div>
   );
