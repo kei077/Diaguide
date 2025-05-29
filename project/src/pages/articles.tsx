@@ -671,12 +671,12 @@ export function ArticlesPage() {
                 <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-12 max-w-md mx-auto">
                   <FileText className="h-16 w-16 text-gray-300 mx-auto mb-4" />
                   <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                    {search ? 'Aucun résultat' : 'Aucun article'}
+                    {search ? 'Aucun résultat' : 'No articles'}
                   </h3>
                   <p className="text-gray-500 mb-6">
                     {search 
                       ? `Aucun article ne correspond à "${search}"`
-                      : 'Commencez par créer votre premier article'
+                      : 'Start by creating your first article.'
                     }
                   </p>
                   {!search && (
