@@ -43,7 +43,7 @@ export default function ManageDoctorAppointments() {
       applyStatusFilter(response.data, statusFilter)
     } catch (error) {
       console.error("Erreur API:", error)
-      toast.error("Erreur lors du chargement des rendez-vous")
+      toast.error("Error loading appointments")
     } finally {
       setLoading(false)
     }
@@ -78,11 +78,11 @@ export default function ManageDoctorAppointments() {
         },
       )
 
-      toast.success("Rendez-vous confirmé avec succès")
+      toast.success("Appointment confirmed successfully")
       await fetchAppointments()
     } catch (error) {
       console.error("Erreur API:", error)
-      toast.error("Erreur lors de la confirmation du rendez-vous")
+      toast.error("Error confirming the appointment")
     } finally {
       setActionLoading(null)
     }
@@ -104,11 +104,11 @@ export default function ManageDoctorAppointments() {
         },
       )
 
-      toast.success("Rendez-vous rejeté avec succès")
+      toast.success("Appointment rejected successfully")
       await fetchAppointments()
     } catch (error) {
       console.error("Erreur API:", error)
-      toast.error("Erreur lors du rejet du rendez-vous")
+      toast.error("Error rejecting the appointment")
     } finally {
       setActionLoading(null)
     }
@@ -131,11 +131,11 @@ export default function ManageDoctorAppointments() {
         },
       )
 
-      toast.success("Rendez-vous annulé avec succès")
+      toast.success("Appointment cancelled successfully")
       await fetchAppointments()
     } catch (error) {
       console.error("Erreur API:", error)
-      toast.error("Erreur lors de l'annulation du rendez-vous")
+      toast.error("Error cancelling the appointment")
     } finally {
       setActionLoading(null)
     }
@@ -155,7 +155,7 @@ export default function ManageDoctorAppointments() {
       hour: "2-digit",
       minute: "2-digit",
     }
-    return new Date(dateString).toLocaleDateString("fr-FR", options)
+    return new Date(dateString).toLocaleDateString("en-US", options)
   }
 
   const getStatusBadge = (status: "pending" | "confirmed" | "rejected" | "cancelled") => {
@@ -167,10 +167,10 @@ export default function ManageDoctorAppointments() {
     }
 
     const statusText = {
-      pending: "En attente",
-      confirmed: "Confirmé",
-      rejected: "Rejeté",
-      cancelled: "Annulé",
+      pending: "Pending",
+  confirmed: "Confirmed",
+  rejected: "Rejected",
+  cancelled: "Cancelled",
     }
 
     return (
@@ -211,12 +211,12 @@ export default function ManageDoctorAppointments() {
   return (
     <div className="max-w-6xl mx-auto px-4 py-10 bg-green-50 min-h-screen">
       <div className="bg-gradient-to-r from-green-600 to-emerald-500 rounded-xl mb-8 p-6 shadow-lg">
-        <h1 className="text-3xl font-bold text-white">Gestion des rendez-vous</h1>
-        <p className="text-green-100 mt-2">Consultez et gérez vos rendez-vous avec les patients</p>
+        <h1 className="text-3xl font-bold text-white">Manage Appointments</h1>
+        <p className="text-green-100 mt-2">View and manage your appointments with patients</p>
       </div>
 
       <div className="mb-8 bg-white p-4 rounded-lg shadow-md border border-green-100">
-        <h2 className="text-lg font-medium text-gray-700 mb-3">Filtrer par statut</h2>
+        <h2 className="text-lg font-medium text-gray-700 mb-3">Filter by status</h2>
         <div className="flex flex-wrap gap-2">
           <button
             onClick={() => handleStatusFilterChange("all")}
@@ -226,7 +226,7 @@ export default function ManageDoctorAppointments() {
                 : "bg-gray-100 text-gray-700 hover:bg-gray-200"
             }`}
           >
-            Tous
+            All
           </button>
           <button
             onClick={() => handleStatusFilterChange("pending")}
@@ -236,7 +236,7 @@ export default function ManageDoctorAppointments() {
                 : "bg-amber-50 text-amber-700 hover:bg-amber-100"
             }`}
           >
-            En attente
+            Pending
           </button>
           <button
             onClick={() => handleStatusFilterChange("confirmed")}
@@ -246,7 +246,7 @@ export default function ManageDoctorAppointments() {
                 : "bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
             }`}
           >
-            Confirmés
+            Confirmed
           </button>
           <button
             onClick={() => handleStatusFilterChange("rejected")}
@@ -256,7 +256,7 @@ export default function ManageDoctorAppointments() {
                 : "bg-rose-50 text-rose-700 hover:bg-rose-100"
             }`}
           >
-            Rejetés
+            Rejected
           </button>
           <button
             onClick={() => handleStatusFilterChange("cancelled")}
@@ -266,7 +266,7 @@ export default function ManageDoctorAppointments() {
                 : "bg-slate-100 text-slate-700 hover:bg-slate-200"
             }`}
           >
-            Annulés
+             Cancelled
           </button>
         </div>
       </div>
@@ -291,8 +291,8 @@ export default function ManageDoctorAppointments() {
               d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
             />
           </svg>
-          <p className="text-lg text-gray-600 font-medium">Aucun rendez-vous trouvé</p>
-          <p className="text-gray-500 mt-1">Aucun rendez-vous ne correspond à votre sélection</p>
+          <p className="text-lg text-gray-600 font-medium">No appointments found</p>
+          <p className="text-gray-500 mt-1">No appointments match your selection</p>
         </div>
       ) : (
         <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-green-200">
@@ -316,7 +316,7 @@ export default function ManageDoctorAppointments() {
                     scope="col"
                     className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                   >
-                    Type de diabète
+                    Diabetes Type
                   </th>
                   <th
                     scope="col"
@@ -328,13 +328,13 @@ export default function ManageDoctorAppointments() {
                     scope="col"
                     className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                   >
-                    Motif
+                    Reason
                   </th>
                   <th
                     scope="col"
                     className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                   >
-                    Statut
+                    Status
                   </th>
                   <th
                     scope="col"
@@ -386,7 +386,7 @@ export default function ManageDoctorAppointments() {
                                   clipRule="evenodd"
                                 />
                               </svg>
-                              <span>{actionLoading === appointment.id ? "Confirmation..." : "Confirmer"}</span>
+                              <span>{actionLoading === appointment.id ? "Confirming…" : "Confirm"}</span>
                             </button>
                             <button
                               onClick={() => handleRejectAppointment(appointment.id)}
@@ -405,7 +405,7 @@ export default function ManageDoctorAppointments() {
                                   clipRule="evenodd"
                                 />
                               </svg>
-                              <span>{actionLoading === appointment.id ? "Rejet..." : "Rejeter"}</span>
+                              <span>{actionLoading === appointment.id ? "Rejecting…" : "Reject"}</span>
                             </button>
                           </>
                         )}
@@ -427,7 +427,7 @@ export default function ManageDoctorAppointments() {
                                 clipRule="evenodd"
                               />
                             </svg>
-                            <span>{actionLoading === appointment.id ? "Annulation..." : "Annuler"}</span>
+                            <span>{actionLoading === appointment.id ? "Cancelling…" : "Cancel"}</span>
                           </button>
                         )}
                       </div>
