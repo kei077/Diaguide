@@ -263,7 +263,7 @@ export default function AppointmentsPage() {
         { headers: { Authorization: `Token ${token}` } },
       )
       .then((response) => {
-        toast.success("Demande de rendez-vous envoyée avec succès")
+        toast.success("Appointment request sent successfully")
         setAppts([response.data, ...appts])
         // Réinitialiser le formulaire
         setReason("")
@@ -296,25 +296,25 @@ export default function AppointmentsPage() {
     const statusMap = {
       pending: {
         icon: "⏳",
-        text: "En attente",
+        text: "Pending",
         bg: "bg-amber-100",
         textColor: "text-amber-800",
       },
       confirmed: {
         icon: "✅",
-        text: "Confirmé",
+        text: "Confirmed",
         bg: "bg-emerald-100",
         textColor: "text-emerald-800",
       },
       rejected: {
         icon: "❌",
-        text: "Rejeté",
+        text: "Rejected",
         bg: "bg-rose-100",
         textColor: "text-rose-800",
       },
       cancelled: {
         icon: "⚪",
-        text: "Annulé",
+        text: "Cancelled",
         bg: "bg-slate-100",
         textColor: "text-slate-800",
       },
@@ -338,7 +338,7 @@ export default function AppointmentsPage() {
       hour: "2-digit",
       minute: "2-digit",
     }
-    return new Date(dateString).toLocaleDateString("fr-FR", options)
+    return new Date(dateString).toLocaleDateString("en-US", options)
   }
 
   // Extraire les spécialités et villes uniques pour les options de filtre
@@ -383,7 +383,7 @@ export default function AppointmentsPage() {
                   type="button"
                   className="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-rose-700 bg-rose-100 hover:bg-rose-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500"
                 >
-                  Réessayer
+                  Retry
                 </button>
               </div>
             )}
@@ -410,7 +410,7 @@ export default function AppointmentsPage() {
             d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
           />
         </svg>
-        Gestion des rendez-vous
+        	Appointment Management
       </h1>
 
       <div className="grid gap-8 md:grid-cols-2">
@@ -428,7 +428,7 @@ export default function AppointmentsPage() {
               >
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
-              Rechercher un médecin
+              Search for a Doctor
             </h2>
 
             {/* Affichage des erreurs de recherche */}
@@ -438,7 +438,7 @@ export default function AppointmentsPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="specialty" className="block text-sm font-medium text-slate-700 mb-1">
-                    Spécialité
+                    	Specialty
                   </label>
                   <select
                     id="specialty"
@@ -446,7 +446,7 @@ export default function AppointmentsPage() {
                     value={specialty}
                     onChange={(e) => setSpecialty(e.target.value)}
                   >
-                    <option value="">Toutes spécialités</option>
+                    <option value="">All Specialties</option>
                     {specialties.map((s) => (
                       <option key={s} value={s}>
                         {s}
@@ -457,7 +457,7 @@ export default function AppointmentsPage() {
 
                 <div>
                   <label htmlFor="city" className="block text-sm font-medium text-slate-700 mb-1">
-                    Ville
+                    City
                   </label>
                   <select
                     id="city"
@@ -465,7 +465,7 @@ export default function AppointmentsPage() {
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
                   >
-                    <option value="">Toutes villes</option>
+                    <option value="">All Cities</option>
                     {cities.map((c) => (
                       <option key={c} value={c}>
                         {c}
@@ -478,7 +478,7 @@ export default function AppointmentsPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="col-span-2">
                   <label htmlFor="priceRange" className="block text-sm font-medium text-slate-700 mb-1">
-                    Prix consultation
+                    	Consultation Price
                   </label>
                   <div className="flex gap-2">
                     <div className="relative flex-1">
@@ -556,7 +556,7 @@ export default function AppointmentsPage() {
                         d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
                       />
                     </svg>
-                    Rechercher
+                    Search
                   </>
                 )}
               </button>
@@ -580,7 +580,7 @@ export default function AppointmentsPage() {
                   d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
                 />
               </svg>
-              Médecins disponibles
+              Available Doctors
             </h2>
 
             {searchLoading ? (
@@ -604,7 +604,7 @@ export default function AppointmentsPage() {
                     d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                   />
                 </svg>
-                <p className="text-slate-500 mt-4">Aucun médecin trouvé</p>
+                <p className="text-slate-500 mt-4">No doctors found</p>
               </div>
             ) : (
               <div className="space-y-3 max-h-96 overflow-y-auto pr-1">
@@ -680,7 +680,7 @@ export default function AppointmentsPage() {
                   d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                 />
               </svg>
-              Nouvelle demande de rendez-vous
+              New Appointment Request
             </h2>
 
             {/* Affichage des erreurs de formulaire */}
@@ -734,7 +734,7 @@ export default function AppointmentsPage() {
 
               <div>
                 <label htmlFor="date" className="block text-sm font-medium text-slate-700 mb-1">
-                  Date et heure *
+                  Date and Time *
                 </label>
                 <input
                   id="date"
@@ -776,7 +776,7 @@ export default function AppointmentsPage() {
 
               <div>
                 <label htmlFor="reason" className="block text-sm font-medium text-slate-700 mb-1">
-                  Motif (optionnel)
+                  Reason (optional)
                 </label>
                 <textarea
                   id="reason"
@@ -846,7 +846,7 @@ export default function AppointmentsPage() {
                         d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                       ></path>
                     </svg>
-                    Envoi en cours...
+                    	Sending…
                   </>
                 ) : (
                   <>
@@ -860,7 +860,7 @@ export default function AppointmentsPage() {
                     >
                       <path strokeLinecap="round" strokeLinejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                     </svg>
-                    Envoyer la demande
+                    Send Request
                   </>
                 )}
               </button>
@@ -885,7 +885,7 @@ export default function AppointmentsPage() {
                     d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
                   />
                 </svg>
-                Vos rendez-vous
+                 Your appointments
               </h2>
 
               {/* Affichage des erreurs de chargement des rendez-vous */}
@@ -925,13 +925,13 @@ export default function AppointmentsPage() {
                             scope="col"
                             className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider"
                           >
-                            Médecin
+                            Doctor
                           </th>
                           <th
                             scope="col"
                             className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider"
                           >
-                            Statut
+                            Status
                           </th>
                           <th
                             scope="col"

@@ -107,15 +107,7 @@ const UserCard = React.memo(({ user }) => {
             <div className="text-white">
               <p className="font-bold text-sm truncate mb-2 drop-shadow-lg">{user.name}</p>
               <div className="flex items-center gap-2">
-                <span
-                  className={cn(
-                    "inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold capitalize",
-                    "backdrop-blur-md border border-white/30 shadow-lg",
-                    roleColors[user.role] || roleColors.patient,
-                  )}
-                >
-                  {user.role}
-                </span>
+              
               </div>
             </div>
           </div>
