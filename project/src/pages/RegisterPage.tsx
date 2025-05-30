@@ -653,16 +653,16 @@ export function RegisterPage() {
                     </div>
                     <ul className="mt-1 text-xs text-gray-600 space-y-1">
                       <li className={`${formData.password.length >= 6 ? "text-green-600" : "text-gray-600"}`}>
-                        Au moins 6 caractères
+                        At least 6 characters
                       </li>
                       <li className={`${/[A-Z]/.test(formData.password) ? "text-green-600" : "text-gray-600"}`}>
-                        Au moins une majuscule
+                        At least one uppercase letter
                       </li>
                       <li className={`${/[0-9]/.test(formData.password) ? "text-green-600" : "text-gray-600"}`}>
-                        Au moins un chiffre
+                        At least one number
                       </li>
                       <li className={`${/[^A-Za-z0-9]/.test(formData.password) ? "text-green-600" : "text-gray-600"}`}>
-                        Au moins un caractère spécial
+                        At least one special character
                       </li>
                     </ul>
                   </div>
