@@ -67,21 +67,17 @@ export interface PracticeDetails {
 
 export interface Medication {
   id: string;
-  name: string;
-  dosage: string;
-  frequency: string;
-  startDate: string;
-  endDate?: string;
-  notes?: string;
+  nom_medicament: string;
+  description?: string;
 }
 
 export interface EmergencyContact {
   id: string;
-  name: string;
-  relationship: string;
-  phoneNumber: string;
+  nom: string;
+  prenom: string;
+  type_relation: string;
+  telephone: string;
   email?: string;
-  isMainContact: boolean;
 }
 
 export interface HealthRecord {

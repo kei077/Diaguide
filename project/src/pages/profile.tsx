@@ -13,6 +13,11 @@ import {
   CheckCircle2,
   Loader2,
 } from "lucide-react"
+import { MedicationsSection } from "@/components/profile/medications-section"
+import { EmergencyContactsSection } from "@/components/profile/emergency-contacts-section"
+import { Medication } from "@/types"
+import axios from "axios"
+import { EmergencyContact } from "@/types"
 
 /* ---------- Types ---------- */
 type CommonProfile = {
@@ -100,11 +105,46 @@ export default function ProfilePage() {
   const [error, setError] = useState<string | null>(null)
   const [saveSuccess, setSaveSuccess] = useState(false)
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({})
+  const [medications, setMedications] = useState<Medication[]>([])
+  const [contacts, setContacts] = useState<EmergencyContact[]>([])
+
+  const token = localStorage.getItem("token") || "";
+
+  const loadMeds = async () => {
+    try {
+      const { data } = await axios.get<Medication[]>(
+        "http://localhost:8000/api/patient/medications/",
+        { headers: { Authorization: `Token ${token}` } }
+      )
+      setMedications(data)
+    } catch (err) {
+      console.error("Erreur fetch meds:", err)
+    }
+  }
+
+  const loadContacts = async () => {
+    try {
+      const { data } = await axios.get<EmergencyContact[]>(
+        "http://localhost:8000/api/patient/proches/",
+        { headers: { Authorization: `Token ${token}` } }
+      )
+      setContacts(data)
+    } catch (err) {
+      console.error("Erreur fetch contacts:", err)
+    }
+  }
+
+  useEffect(() => {
+      fetchUserProfile()
+  }, [])
 
   /* ----- Fetch on mount ----- */
   useEffect(() => {
-    fetchUserProfile()
-  }, [])
+    if(profileData?.role == "patient"){
+      loadMeds()
+      loadContacts()
+    }
+  }, [profileData])
 
   const fetchUserProfile = async () => {
     try {
@@ -477,55 +517,77 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            {/* Patient-specific fields */}
+           {/* Patient-specific fields */}
             {isPatient && (
-              <div className="mb-8">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-                  <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
-                    <FileText className="w-4 h-4 text-blue-600" />
-                  </div>
-                  Medical Information
-                </h2>
+              <>
+                <div className="mb-8">
+                  <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                    <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                      <FileText className="w-4 h-4 text-blue-600" />
+                    </div>
+                    Medical Information
+                  </h2>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {renderField(
-                    "date_of_birth",
-                    "Birth Date",
-                    (formData as PatientProfile)?.profile?.date_of_birth,
-                    "date",
-                    "date_of_birth",
-                  )}
-                  {renderField("gender", "Gender", (formData as PatientProfile)?.profile?.gender, "text", "gender")}
-                  {renderField(
-                    "weight",
-                    "Weight (kg)",
-                    (formData as PatientProfile)?.profile?.weight,
-                    "number",
-                    "weight",
-                  )}
-                  {renderField(
-                    "height",
-                    "Height (cm)",
-                    (formData as PatientProfile)?.profile?.height,
-                    "number",
-                    "height",
-                  )}
-                  {renderField(
-                    "type_diabete",
-                    "Diabetes Type",
-                    (formData as PatientProfile)?.profile?.type_diabete,
-                    "text",
-                    "type_diabete",
-                  )}
-                  {renderField(
-                    "date_maladie",
-                    "Diagnosis Date",
-                    (formData as PatientProfile)?.profile?.date_maladie,
-                    "date",
-                    "date_maladie",
-                  )}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {renderField(
+                      "date_of_birth",
+                      "Birth Date",
+                      (formData as PatientProfile)?.profile?.date_of_birth,
+                      "date",
+                      "date_of_birth",
+                    )}
+                    {renderField(
+                      "gender",
+                      "Gender",
+                      (formData as PatientProfile)?.profile?.gender,
+                      "text",
+                      "gender",
+                    )}
+                    {renderField(
+                      "weight",
+                      "Weight (kg)",
+                      (formData as PatientProfile)?.profile?.weight,
+                      "number",
+                      "weight",
+                    )}
+                    {renderField(
+                      "height",
+                      "Height (cm)",
+                      (formData as PatientProfile)?.profile?.height,
+                      "number",
+                      "height",
+                    )}
+                    {renderField(
+                      "type_diabete",
+                      "Diabetes Type",
+                      (formData as PatientProfile)?.profile?.type_diabete,
+                      "text",
+                      "type_diabete",
+                    )}
+                    {renderField(
+                      "date_maladie",
+                      "Diagnosis Date",
+                      (formData as PatientProfile)?.profile?.date_maladie,
+                      "date",
+                      "date_maladie",
+                    )}
+                  </div>
                 </div>
-              </div>
+
+                <div className="mb-8">
+                  <MedicationsSection
+                   medications={medications} 
+                   onAddSuccess={loadMeds}
+                   />
+                </div>
+
+                <div className="mb-8">
+                  <EmergencyContactsSection
+                    contacts={contacts}
+                    onAddSuccess={loadContacts}
+                  />
+                </div>
+              </>
             )}
 
             {/* Doctor-specific fields */}
