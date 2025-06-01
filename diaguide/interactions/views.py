@@ -282,7 +282,6 @@ class ApproveAppointmentRequestView(APIView):
 
 class RejectAppointmentRequestView(APIView):
     
-
     def patch(self, request, request_id):
         if request.user.role != 'medecin':
             return Response({"error": "Only doctors can reject appointments."}, status=403)

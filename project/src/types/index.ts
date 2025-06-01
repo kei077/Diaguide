@@ -135,3 +135,11 @@ export type Article = z.infer<typeof articleSchema> & {
   createdAt: string;
   updatedAt: string;
 };
+
+export interface Notification {
+  id: number;
+  title: string;
+  message: string;
+  is_read: boolean;
+  timestamp: string;
+}

@@ -27,6 +27,7 @@ from interactions.models import AppointmentRequest
 from django.template.loader import render_to_string
 from django.core.mail import EmailMultiAlternatives
 from django.utils import timezone
+
 class PatientDashboardView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -301,6 +302,7 @@ class ProcheDetailView(generics.RetrieveUpdateDestroyAPIView):
 
     def get_queryset(self):
         return Proche.objects.filter(patient__user=self.request.user)
+
 class DoctorPatientsListView(generics.ListAPIView):
     """
     GET /api/patient/doctor/patients/?email=<email_medecin>
