@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis,Legend, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 import { Utensils, Activity, Weight, Heart, Footprints, Syringe, Apple, Ruler, TrendingUp, PlusCircle, Calendar, User } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { toast } from 'sonner';
@@ -13,6 +13,12 @@ interface StatCardProps {
   trend?: string;
   color?: 'blue' | 'purple' | 'cyan' | 'red' | 'green' | 'orange';
 }
+type TensionRecord = {
+  id?: number;
+  systolique: number;
+  diastolique: number;
+  date_heure: string;
+};
 
 const StatCard = ({ icon: Icon, title, value, unit, trend, color = 'blue' }: StatCardProps) => {
   const colorMap = {
@@ -196,14 +202,17 @@ export function PatientDashboard() {
   const [insulinSeries, setInsulinSeries] = useState<RecordPoint[]>([]);
   const [meals, setMeals] = useState<Meal[]>([]);
   const [activities, setActivities] = useState<Activity[]>([]);
+  const [tensionValue, setTensionValue] = useState({ systolique: 0, diastolique: 0 });
+  const [tensionSeries, setTensionSeries] = useState<TensionRecord[]>([]);
+;
 
   // Modal states
   const [showModal, setShowModal] = useState(false);
   const [showMealModal, setShowMealModal] = useState(false);
   const [showActivityModal, setShowActivityModal] = useState(false);
   
-  // Form states
-  const [newType, setNewType] = useState<'glucose' | 'insulin' | 'weight'>('glucose');
+
+  const [newType, setNewType] = useState<'glucose' | 'insulin' | 'weight' | 'tension'>('glucose');
   const [newValue, setNewValue] = useState<number>(0);
   const [mealForm, setMealForm] = useState({
     type_repas: 'breakfast',
@@ -224,8 +233,15 @@ export function PatientDashboard() {
   const averageGlucose = useMemo(() => calculateAverageGlucose(glucoseSeries), [glucoseSeries]);
   const todayInsulinCount = useMemo(() => getTodayInsulinCount(insulinSeries), [insulinSeries]);
   const totalActivityTime = activities.reduce((sum, a) => sum + a.duration, 0);
-  const bmiInfo = getBMICategory(dashboard?.metrics.bmi);
-
+  const bmiInfo = getBMICategory(dashboard?.metrics.bmi ?? null);
+const averageTension = useMemo(() => {
+  if (!tensionSeries.length) return null;
+  const systolics = tensionSeries.map(r => r.systolique);
+  const diastolics = tensionSeries.map(r => r.diastolique);
+  const meanSys = Math.round(systolics.reduce((a, b) => a + b, 0) / systolics.length);
+  const meanDia = Math.round(diastolics.reduce((a, b) => a + b, 0) / diastolics.length);
+  return { meanSys, meanDia };
+}, [tensionSeries]);
   // Load initial data
   useEffect(() => {
     if (!token) {
@@ -242,49 +258,93 @@ export function PatientDashboard() {
       axios.get<RecordPoint[]>(`${BASE}/weight/`, config),
       axios.get<RecordPoint[]>(`${BASE}/insulin/`, config),
       axios.get<Meal[]>(`${BASE}/repas/`, config),
-      axios.get<Activity[]>(`${BASE}/activities/`, config)
+      axios.get<Activity[]>(`${BASE}/activities/`, config),
+      axios.get<TensionRecord[]>(`${BASE}/tensions/`, config)
     ])
-      .then(([dashboardRes, glucoseRes, weightRes, insulinRes, mealsRes, activitiesRes]) => {
+      .then(([dashboardRes, glucoseRes, weightRes, insulinRes, mealsRes, activitiesRes,tensionRes]) => {
         setDashboard(dashboardRes.data);
         setGlucoseSeries(glucoseRes.data);
         setWeightSeries(weightRes.data);
         setInsulinSeries(insulinRes.data);
         setMeals(mealsRes.data);
         setActivities(activitiesRes.data);
+        setTensionSeries(tensionRes.data);
       })
       .catch(err => handleApiError(err, setDashError))
       .finally(() => setDashLoading(false));
   }, [token]);
 
   // Handle measurements (glucose, insulin, weight)
-  const handleAdd = () => {
-    setFormError(null);
-    if (newValue <= 0) {
-      setFormError('Please enter a valid value');
+const handleAdd = () => {
+  setFormError(null);
+
+  // --- Cas tension artérielle ---
+  if (newType === 'tension') {
+    const { systolique, diastolique } = tensionValue;
+
+    // Validation pour la tension artérielle
+    if (
+      !systolique || !diastolique ||
+      isNaN(systolique) || isNaN(diastolique) ||
+      systolique < 50 || systolique > 250 ||
+      diastolique < 30 || diastolique > 150 ||
+      systolique <= diastolique
+    ) {
+      setFormError('Please enter a valid and realistic blood pressure (systolic > diastolic, e.g. 120/80)');
       return;
     }
+    const nowIso = new Date().toISOString();
     setLoadingAdd(true);
     axios.post(
-      `${BASE}/${newType}/`,
-      newType === 'insulin' ? { dose: newValue } : { value: newValue },
+      `${BASE}/tensions/`, // adapte à ton endpoint backend
+      { systolique, diastolique, date_heure: nowIso },
       { headers: { Authorization: `Token ${token}` } }
     )
       .then(() => {
-        toast.success('Measurement added');
-        return axios.get<RecordPoint[]>(`${BASE}/${newType}/`, { 
-          headers: { Authorization: `Token ${token}` } 
+        toast.success('Blood pressure added');
+        return axios.get<TensionRecord[]>(`${BASE}/tensions/`, {
+          headers: { Authorization: `Token ${token}` }
         });
       })
       .then(res => {
-        if (newType === 'glucose') setGlucoseSeries(res.data);
-        if (newType === 'weight') setWeightSeries(res.data);
-        if (newType === 'insulin') setInsulinSeries(res.data);
+        setTensionSeries(res.data);
         setShowModal(false);
-        setNewValue(0);
+        setTensionValue({ systolique: 0, diastolique: 0 });
       })
       .catch(err => handleApiError(err, setFormError))
       .finally(() => setLoadingAdd(false));
-  };
+
+    return; // Pour ne pas poursuivre avec les autres cas
+  }
+
+  // --- Cas Glucose, Insulin, Weight ---
+  if (newValue <= 0) {
+    setFormError('Please enter a valid value');
+    return;
+  }
+
+  setLoadingAdd(true);
+  axios.post(
+    `${BASE}/${newType}/`,
+    newType === 'insulin' ? { dose: newValue } : { value: newValue },
+    { headers: { Authorization: `Token ${token}` } }
+  )
+    .then(() => {
+      toast.success('Measurement added');
+      return axios.get<RecordPoint[]>(`${BASE}/${newType}/`, {
+        headers: { Authorization: `Token ${token}` }
+      });
+    })
+    .then(res => {
+      if (newType === 'glucose') setGlucoseSeries(res.data);
+      if (newType === 'weight') setWeightSeries(res.data);
+      if (newType === 'insulin') setInsulinSeries(res.data);
+      setShowModal(false);
+      setNewValue(0);
+    })
+    .catch(err => handleApiError(err, setFormError))
+    .finally(() => setLoadingAdd(false));
+};
 
   // Handle meals
   const handleAddMeal = async () => {
@@ -350,7 +410,7 @@ export function PatientDashboard() {
             <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
               Health Dashboard
             </h1>
-            <p className="text-gray-600 mt-2 text-lg">Welcome back, {user?.username}</p>
+            <p className="text-gray-600 mt-2 text-lg">Welcome back,</p>
           </div>
           <div className="flex gap-3">
             <button 
@@ -400,10 +460,17 @@ export function PatientDashboard() {
           <StatCard 
             icon={Ruler} 
             title="BMI Status" 
-            value={dashboard?.metrics.bmi} 
+            value={dashboard?.metrics.bmi ?? null} 
             unit="kg/m²" 
             color="cyan" 
           />
+          <StatCard 
+  icon={Heart}
+  title="Avg Blood Pressure"
+  value={averageTension ? `${averageTension.meanSys}/${averageTension.meanDia}` : '—'}
+  unit="mmHg"
+  color="red"
+/>
         </div>
 
         {/* BMI Info Card */}
@@ -553,6 +620,58 @@ export function PatientDashboard() {
               </ResponsiveContainer>
             </div>
           </div>
+          <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-200">
+  <div className="flex items-center gap-3 mb-6">
+    <div className="rounded-xl bg-red-100 p-2">
+      <Heart className="h-5 w-5 text-red-600" />
+    </div>
+    <h3 className="font-bold text-gray-900 text-lg">Blood Pressure Trends</h3>
+  </div>
+  <div className="h-80">
+    <ResponsiveContainer width="100%" height="100%">
+      <LineChart
+        data={tensionSeries.map(r => ({
+          date: new Date(r.date_heure).toLocaleDateString('en-US', { day: 'numeric', month: 'short' }),
+          systolique: r.systolique,
+          diastolique: r.diastolique,
+        }))}
+        margin={{ top: 20, right: 30, left: 0, bottom: 0 }}
+      >
+        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+        <XAxis dataKey="date" stroke="#64748b" fontSize={12} />
+        <YAxis stroke="#64748b" fontSize={12} />
+        <Tooltip
+          contentStyle={{
+            backgroundColor: 'white',
+            border: '1px solid #e2e8f0',
+            borderRadius: '12px',
+            boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)'
+          }}
+        />
+        <Line
+          type="monotone"
+          dataKey="systolique"
+          name="Systolic"
+          stroke="#ef4444"
+          strokeWidth={3}
+          dot={{ r: 4 }}
+          activeDot={{ r: 7, stroke: '#ef4444', strokeWidth: 2 }}
+        />
+        <Line
+          type="monotone"
+          dataKey="diastolique"
+          name="Diastolic"
+          stroke="#3b82f6"
+          strokeWidth={3}
+          dot={{ r: 4 }}
+          activeDot={{ r: 7, stroke: '#3b82f6', strokeWidth: 2 }}
+        />
+        <Legend />
+      </LineChart>
+    </ResponsiveContainer>
+  </div>
+</div>
+
         </div>
 
         {/* Meals & Activities */}
@@ -641,55 +760,110 @@ export function PatientDashboard() {
         </div>
 
         {/* Add Measurement Modal */}
-        {showModal && (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl p-8 w-full max-w-md shadow-2xl transform transition-all">
-              <h2 className="text-2xl font-bold mb-6 text-gray-900">Add Measurement</h2>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-semibold mb-2 text-gray-700">Type</label>
-                  <select 
-                    value={newType}
-                    onChange={(e) => setNewType(e.target.value as 'glucose' | 'insulin' | 'weight')}
-                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="glucose">Glucose</option>
-                    <option value="insulin">Insulin</option>
-                    <option value="weight">Weight</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold mb-2 text-gray-700">Value</label>
-                  <input 
-                    type="number" 
-                    value={newValue}
-                    onChange={(e) => setNewValue(Number(e.target.value))}
-                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter value..."
-                    min="0"
-                    step={newType === 'weight' ? '0.1' : '1'}
-                  />
-                </div>
-              </div>
-              {formError && <p className="text-red-500 text-sm mt-4">{formError}</p>}
-              <div className="flex justify-end gap-3 mt-8">
-                <button 
-                  onClick={() => setShowModal(false)}
-                  className="px-6 py-3 text-gray-700 border border-gray-300 rounded-xl hover:bg-gray-50 transition"
-                >
-                  Cancel
-                </button>
-                <button 
-                  onClick={handleAdd}
-                  disabled={loadingAdd}
-                  className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition font-semibold disabled:opacity-70"
-                >
-                  {loadingAdd ? 'Saving...' : 'Save'}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+{showModal && (
+  <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div className="bg-white rounded-2xl p-8 w-full max-w-md shadow-2xl transform transition-all">
+      <h2 className="text-2xl font-bold mb-6 text-gray-900">Add Measurement</h2>
+      <div className="space-y-4">
+        <div>
+          <label className="block text-sm font-semibold mb-2 text-gray-700">Type</label>
+          <select 
+            value={newType}
+            onChange={(e) => setNewType(e.target.value as any)}
+            className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          >
+            <option value="glucose">Glucose</option>
+            <option value="insulin">Insulin</option>
+            <option value="weight">Weight</option>
+            <option value="tension">Blood Pressure</option>
+          </select>
+        </div>
+        {/* If Tension: show two fields, else show one */}
+    {newType === 'tension' ? (
+  <div className="flex gap-2">
+    <div className="flex-1">
+      <label className="block text-sm font-semibold mb-2 text-gray-700">Systolic</label>
+      <input 
+        type="number"
+        value={
+          tensionValue?.systolique === 0
+            ? ''
+            : (tensionValue?.systolique ?? '')
+        }
+        onChange={e => {
+          // Contrôle : n'accepte que les chiffres ou vide
+          const v = e.target.value === '' ? 0 : Number(e.target.value);
+          setTensionValue(tv => ({ ...tv, systolique: v }));
+        }}
+        className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        min={50}
+        max={250}
+        placeholder="e.g. 120"
+        inputMode="numeric"
+      />
+    </div>
+    <div className="flex-1">
+      <label className="block text-sm font-semibold mb-2 text-gray-700">Diastolic</label>
+      <input 
+        type="number"
+        value={
+          tensionValue?.diastolique === 0
+            ? ''
+            : (tensionValue?.diastolique ?? '')
+        }
+        onChange={e => {
+          const v = e.target.value === '' ? 0 : Number(e.target.value);
+          setTensionValue(tv => ({ ...tv, diastolique: v }));
+        }}
+        className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        min={30}
+        max={150}
+        placeholder="e.g. 80"
+        inputMode="numeric"
+      />
+    </div>
+  </div>
+) : (
+  <div>
+    <label className="block text-sm font-semibold mb-2 text-gray-700">Value</label>
+    <input 
+      type="number" 
+      value={newValue === 0 ? '' : newValue}
+      onChange={e => {
+        const v = e.target.value === '' ? 0 : Number(e.target.value);
+        setNewValue(v);
+      }}
+      className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+      placeholder="Enter value..."
+      min="0"
+      step={newType === 'weight' ? '0.1' : '1'}
+      inputMode="numeric"
+    />
+  </div>
+)}
+
+
+      </div>
+      {formError && <p className="text-red-500 text-sm mt-4">{formError}</p>}
+      <div className="flex justify-end gap-3 mt-8">
+        <button 
+          onClick={() => setShowModal(false)}
+          className="px-6 py-3 text-gray-700 border border-gray-300 rounded-xl hover:bg-gray-50 transition"
+        >
+          Cancel
+        </button>
+        <button 
+          onClick={handleAdd}
+          disabled={loadingAdd}
+          className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition font-semibold disabled:opacity-70"
+        >
+          {loadingAdd ? 'Saving...' : 'Save'}
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
 
         {/* Add Meal Modal */}
         {showMealModal && (

@@ -5,15 +5,9 @@ import { Button } from "@/components/ui/button"
 import { useAuth } from "@/hooks/use-auth"
 import { useTheme } from "@/contexts/theme-context"
 import { Bell, Search, Sun, Moon, User, ChevronDown } from "lucide-react"
+import { Notification } from "@/types"
+import { fetchNotifications, markNotificationAsRead } from "@/lib/api/notifications"
 
-/**
- * Composant Header amélioré :
- * - Zone de recherche avec animations fluides et suggestions
- * - Bascule de thème avec transition smooth
- * - Notifications avec badge animé et dropdown
- * - Menu utilisateur avec dropdown et avatar
- * - Micro-interactions et effets visuels avancés
- */
 export function Header() {
   const { user, logout } = useAuth()
   const { theme, toggleTheme } = useTheme()
@@ -23,10 +17,26 @@ export function Header() {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
   const [isNotificationOpen, setIsNotificationOpen] = useState(false)
   const [searchValue, setSearchValue] = useState("")
+  const [notifications, setNotifications] = useState<Notification[]>([])
+  const unreadCount = notifications.filter(n => !n.is_read).length
 
   // Refs pour la gestion des clics extérieurs
   const userMenuRef = useRef<HTMLDivElement>(null)
   const notificationRef = useRef<HTMLDivElement>(null)
+
+  // load notifications when component mounts
+  useEffect(() => {
+    const token = localStorage.getItem("token") || ""
+    fetchNotifications(token).then(setNotifications).catch(console.error)
+  }, [])
+
+  // whenever we open the dropdown, refresh (so new ones show up)
+  useEffect(() => {
+    if (isNotificationOpen) {
+      const token = localStorage.getItem("token") || ""
+      fetchNotifications(token).then(setNotifications).catch(console.error)
+    }
+  }, [isNotificationOpen])
 
   // Fermeture des menus au clic extérieur
   useEffect(() => {
@@ -53,7 +63,7 @@ export function Header() {
   }
 
   return (
-    <header className="relative bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50 transition-all duration-300 shadow-sm hover:shadow-md">
+    <header className="relative z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50 transition-all duration-300 shadow-sm hover:shadow-md">
       <div className="flex h-16 items-center justify-between px-6 max-w-7xl mx-auto">
         {/* Zone de recherche améliorée */}
         <div className="flex items-center gap-4">
@@ -135,14 +145,16 @@ export function Header() {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => setIsNotificationOpen(!isNotificationOpen)}
+              onClick={() => setIsNotificationOpen((f) => !f)}
               className="relative group h-10 w-10 rounded-xl hover:bg-gradient-to-br hover:from-red-50 hover:to-pink-50 dark:hover:from-gray-700 dark:hover:to-gray-600 transition-all duration-300 hover:scale-110 active:scale-95"
             >
               <div className="absolute inset-0 bg-gradient-to-br from-red-400/20 to-pink-400/20 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               <Bell className="h-5 w-5 relative z-10 transition-all duration-300 group-hover:rotate-12 group-hover:text-red-500" />
-              <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-br from-red-500 to-pink-500 text-[10px] text-white font-bold shadow-lg animate-pulse">
-                3
-              </span>
+              {unreadCount > 0 && (
+                <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-br from-red-500 to-pink-500 text-[10px] text-white font-bold shadow-lg animate-pulse">
+                  {unreadCount}
+                </span>
+              )}
             </Button>
 
             {/* Dropdown des notifications */}
@@ -152,17 +164,41 @@ export function Header() {
                   <h3 className="font-semibold text-gray-900 dark:text-gray-100">Notifications</h3>
                 </div>
                 <div className="max-h-64 overflow-y-auto">
-                  {[1, 2, 3].map((i) => (
-                    <div
-                      key={i}
-                      className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border-b border-gray-100 dark:border-gray-700 last:border-b-0"
-                    >
-                      <p className="text-sm text-gray-900 dark:text-gray-100">Notification {i}</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        Il y a {i} minute{i > 1 ? "s" : ""}
-                      </p>
+                  {notifications.length === 0 ? (
+                    <div className="p-4 text-center text-gray-500 dark:text-gray-400">
+                      Aucune notification.
                     </div>
-                  ))}
+                  ) : (
+                    notifications.map((n) => (
+                      <div
+                        key={n.id}
+                        className={`p-4 flex flex-col hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border-b border-gray-100 dark:border-gray-700 last:border-b-0 cursor-pointer ${
+                          n.is_read ? "" : "bg-gray-100 dark:bg-gray-700"
+                        }`}
+                        onClick={async () => {
+                          if (!n.is_read) {
+                            const token = localStorage.getItem("token") || "";
+                            await markNotificationAsRead(token, n.id);
+                            setNotifications((prev) =>
+                              prev.map((x) =>
+                                x.id === n.id ? { ...x, is_read: true } : x
+                              )
+                            );
+                          }
+                        }}
+                      >
+                        <span className="font-medium text-gray-900 dark:text-gray-100">
+                          {n.title}
+                        </span>
+                        <small className="text-xs text-gray-500 dark:text-gray-400">
+                          {new Date(n.timestamp).toLocaleString()}
+                        </small>
+                        <p className="text-sm mt-1 text-gray-800 dark:text-gray-200">
+                          {n.message}
+                        </p>
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
             )}

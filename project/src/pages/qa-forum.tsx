@@ -68,7 +68,7 @@ export function QuestionForm({ onSubmit, onCancel }: QuestionFormProps) {
     setError(null);
 
     if (!title.trim() || !body.trim()) {
-      setError('Le titre et le contenu sont obligatoires.');
+      setError('Title and content are required.');
       return;
     }
 
@@ -115,7 +115,7 @@ export function QuestionForm({ onSubmit, onCancel }: QuestionFormProps) {
       )}
       <div>
         <label htmlFor="title" className="block text-sm font-medium text-slate-700 dark:text-slate-200">
-          Titre de la question
+          Question Title
         </label>
         <input
           type="text"
@@ -128,14 +128,14 @@ export function QuestionForm({ onSubmit, onCancel }: QuestionFormProps) {
             "bg-white/80 dark:bg-slate-700/90",
             "focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
           )}
-          placeholder="Quel est votre sujet ?"
+          placeholder="What’s your topic?"
           required
           disabled={submitting}
         />
       </div>
       <div>
         <label htmlFor="body" className="block text-sm font-medium text-slate-700 dark:text-slate-200">
-          Détails
+          Details
         </label>
         <textarea
           id="body"
@@ -148,7 +148,7 @@ export function QuestionForm({ onSubmit, onCancel }: QuestionFormProps) {
             "bg-white/80 dark:bg-slate-700/90",
             "focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
           )}
-          placeholder="Expliquez votre question en détail..."
+          placeholder="Explain your question in detail…"
           required
           disabled={submitting}
         />
@@ -161,14 +161,14 @@ export function QuestionForm({ onSubmit, onCancel }: QuestionFormProps) {
           disabled={submitting}
           className="border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700"
         >
-          Annuler
+          Cancel
         </Button>
         <Button 
           type="submit" 
           disabled={submitting}
           className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white shadow-lg shadow-emerald-500/30"
         >
-          {submitting ? 'Publication…' : 'Poser la question'}
+          {submitting ? 'Posting…' : 'Ask a question'}
         </Button>
       </div>
     </form>
@@ -190,7 +190,7 @@ export function AnswerForm({
     setError(null);
 
     if (!body.trim()) {
-      setError('Le contenu de la réponse ne peut pas être vide.');
+      setError('Answer content cannot be empty.');
       return;
     }
 
@@ -248,7 +248,7 @@ export function AnswerForm({
           htmlFor="answer"
           className="block text-sm font-medium text-slate-700 dark:text-slate-200"
         >
-          Votre réponse
+          Your Answer
         </label>
         <textarea
           id="answer"
@@ -261,7 +261,7 @@ export function AnswerForm({
             "bg-white/80 dark:bg-slate-700/90",
             "focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
           )}
-          placeholder="Partagez vos connaissances..."
+          placeholder="Share your knowledge..."
           required
           disabled={submitting}
         />
@@ -275,14 +275,14 @@ export function AnswerForm({
           disabled={submitting}
           className="border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700"
         >
-          Annuler
+          Cancel
         </Button>
         <Button 
           type="submit" 
           disabled={submitting}
           className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white shadow-lg shadow-emerald-500/30"
         >
-          {submitting ? 'Envoi…' : 'Poster la réponse'}
+          {submitting ? 'Sending…' : 'Post Answer'}
         </Button>
       </div>
     </form>
@@ -383,7 +383,7 @@ export function QuestionCard({ question }: QuestionCardProps) {
         {displayedAnswers.length > 0 ? (
           displayedAnswers.map(renderAnswer)
         ) : (
-          <p className="text-sm text-slate-400 italic">Aucune réponse pour le moment</p>
+          <p className="text-sm text-slate-400 italic">No answers yet.</p>
         )}
 
         {answers.length > 1 && (
@@ -416,7 +416,7 @@ export function QuestionCard({ question }: QuestionCardProps) {
             className="mt-2 border-emerald-500 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-slate-700"
           >
             <MessageSquare className="h-4 w-4 mr-2 text-emerald-600 dark:text-emerald-400" />
-            {answers.length > 0 ? 'Ajouter une réponse' : 'Répondre'}
+            {answers.length > 0 ? 'Add an Answer' : 'Reply'}
           </Button>
         )}
       </div>
@@ -483,7 +483,7 @@ export function QAForum() {
   if (loading) {
     return (
       <div className="text-center py-6 text-slate-600 dark:text-slate-400">
-        Chargement des questions…
+         Loading questions…
       </div>
     );
   }
@@ -504,14 +504,14 @@ export function QAForum() {
         "shadow-lg shadow-emerald-100/20 dark:shadow-emerald-900/10"
       )}>
         <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">
-          Forum de Questions/Réponses
+          Q&A Forum
         </h1>
         <Button 
           onClick={() => setIsAskingQuestion(true)}
           className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white shadow-lg shadow-emerald-500/30"
         >
           <MessageSquare className="h-5 w-5 mr-2" />
-          Poser une question
+          Ask a Question
         </Button>
       </div>
 
@@ -547,9 +547,9 @@ export function QAForum() {
             "bg-white/80 dark:bg-slate-700/90 dark:text-slate-100"
           )}
         >
-          <option value="all">Toutes</option>
-          <option value="unanswered">Sans réponse</option>
-          <option value="answered">Avec réponse</option>
+          <option value="all">All</option>
+          <option value="unanswered">Unanswered</option>
+          <option value="answered">answered</option>
         </select>
       </div>
 
@@ -566,7 +566,7 @@ export function QAForum() {
           ))}
           {filteredQuestions.length === 0 && (
             <p className="text-center text-slate-500">
-              Aucune question trouvée.
+              No questions found.
             </p>
           )}
         </div>

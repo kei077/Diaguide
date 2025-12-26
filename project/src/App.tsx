@@ -15,6 +15,7 @@ import { ArticlesPage}  from './pages/articles';
 import { useAuth } from './hooks/use-auth';
 import { Button } from './components/ui/button';
 import { RegisterPage } from './pages/RegisterPage';
+import { DiaBotPrompt } from "./pages/DiaBotPrompt"; 
 import  Learn from './pages/learn';
 import { Patients} from './pages/patients';
 
@@ -105,6 +106,14 @@ function AppContent() {
                   element={
                     <PrivateRoute>
                       <PatientDashboard />
+                    </PrivateRoute>
+                  }
+                />
+                 <Route
+                  path="/diabot"
+                  element={
+                    <PrivateRoute>
+                      <DiaBotPrompt />
                     </PrivateRoute>
                   }
                 />

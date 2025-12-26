@@ -19,6 +19,7 @@ import {
   Bell,
   FileText,
   BarChart,
+  Bot
 } from "lucide-react"
 
 // Memoized NavItem component with green color scheme
@@ -106,15 +107,7 @@ const UserCard = React.memo(({ user }) => {
             <div className="text-white">
               <p className="font-bold text-sm truncate mb-2 drop-shadow-lg">{user.name}</p>
               <div className="flex items-center gap-2">
-                <span
-                  className={cn(
-                    "inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold capitalize",
-                    "backdrop-blur-md border border-white/30 shadow-lg",
-                    roleColors[user.role] || roleColors.patient,
-                  )}
-                >
-                  {user.role}
-                </span>
+              
               </div>
             </div>
           </div>
@@ -182,6 +175,7 @@ export function Sidebar() {
         { href: "/learn", icon: Brain, label: "Learn About Diabetes" },
         { href: "/qa", icon: MessageSquare, label: "Q&A Forum" },
         { href: "/appointments", icon: BookOpen, label: "Appointments" },
+         { href: "/diabot", icon: Bot, label: "DiaBot AI" },
       ],
       doctor: [
         { href: "/profile", icon: User, label: "Profile" },
@@ -190,6 +184,7 @@ export function Sidebar() {
         { href: "/qa", icon: MessageSquare, label: "Q&A Forum" },
         { href: "/learn", icon: Brain, label: "Knowledge Base" },
         { href: "/doctor-appointments", icon: BookOpen, label: "Appointments" },
+         { href: "/diabot", icon: Bot, label: "DiaBot AI" },
       ],
       admin: [
         { href: "/profile", icon: User, label: "Profile" },

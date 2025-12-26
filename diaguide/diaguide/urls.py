@@ -10,7 +10,7 @@ urlpatterns = [
     path('content/', include('educational_content.urls')),
     path('interactions/', include('interactions.urls')),
     path('api/medecin/', include('medecin.urls')),
-    path('api/notif', include('notifications.urls')),
+    path('api/notifications/', include('notifications.urls')),
 ]
 
 
